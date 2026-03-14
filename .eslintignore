@@ -1,0 +1,13 @@
+# Ignored by ESLint
+node_modules/
+dist/
+**/dist/
+coverage/
+.nx/cache/
+.nx/workspace-data/
+.env*
+docker-compose.override.yml
+*.log
+# ignore generated files
+**/*.swagger.json
+**/*.gql

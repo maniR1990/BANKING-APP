@@ -1,0 +1,22 @@
+# Add files here to ignore them from prettier formatting
+
+# Build and distribution
+/dist
+**/dist
+
+# Coverage reports
+/coverage
+
+# Nx cache
+/.nx/cache
+/.nx/workspace-data
+
+# Dependencies
+node_modules
+
+# Environment and config
+.env*
+docker-compose.override.yml
+
+# Logs
+*.log

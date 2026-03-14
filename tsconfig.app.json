@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/apps/banking-app",
+    "types": ["node"],
+    "declaration": false,
+    "module": "commonjs"
+  },
+  "exclude": ["jest.config.ts", "src/**/*.spec.ts", "test/**/*"]
+}

@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/apps/auth",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node", "@types/express"],
+    "declaration": false
+  },
+  "exclude": ["jest.config.ts", "src/**/*.spec.ts", "test/**/*"]
+}
