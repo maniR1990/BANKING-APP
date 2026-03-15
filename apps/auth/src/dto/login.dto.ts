@@ -31,3 +31,8 @@ export class RegisterDto {
   @IsString()
   role?: string; // Default will be 'customer' in the entity
 }
+
+export class ForgotPasswordDto {
+  @IsEmail({}, { message: 'Please provide a valid banking email' })
+  email: string;
+}

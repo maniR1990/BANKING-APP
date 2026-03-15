@@ -14,7 +14,7 @@ import * as express from 'express';
 import { v4 as uuid4 } from 'uuid';
 import { AuthService } from './auth.service';
 import { RedisService } from './../redis/redis.service';
-import { LoginDto, RegisterDto } from '../dto/login.dto';
+import { LoginDto, RegisterDto, ForgotPasswordDto } from '../dto/login.dto';
 
 @Controller('auth')
 @UsePipes(new ValidationPipe({ whitelist: true })) // Security: Strips non-DTO properties
@@ -86,6 +86,14 @@ export class AuthController {
     res.clearCookie('banking_session');
 
     return { message: 'Password changed successfully, all sessions invalidated' };
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    await this.authService.forgotPassword(forgotPasswordDto.email);
+    return {
+      message: 'If an account with that email exists, a password reset link has been sent.',
+    };
   }
 
   @Post('logout')
