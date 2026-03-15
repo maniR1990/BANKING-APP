@@ -20,6 +20,32 @@ In a distributed microservices environment, observing the behavior of requests a
     *   *Self-Hosted / Open Source:* **Grafana LGTM Stack** (Loki for logs, Grafana for visualization, Tempo/Jaeger for traces, Mimir/Prometheus for metrics).
     *   *SaaS / Enterprise:* **Datadog**, **New Relic**, or **Dynatrace**. These platforms natively ingest OTel data and provide advanced AI-driven anomaly detection out of the box.
 
+### Implementing the Grafana LGTM Stack
+The LGTM stack (Loki, Grafana, Tempo, Mimir) is the recommended open-source path for correlating logs, traces, and metrics.
+
+**Step-by-Step Implementation:**
+
+1. **Infrastructure Provisioning (Docker Compose/K8s):**
+   * Add containers for Loki (log aggregation), Tempo (distributed tracing backend), Mimir/Prometheus (metrics), and Grafana (visualization UI) to your infrastructure definitions.
+   * Add an **OpenTelemetry Collector (OTel Collector)** container. This acts as the central router: applications send telemetry here, and the Collector forwards logs to Loki, traces to Tempo, and metrics to Mimir.
+
+2. **Application Instrumentation (NestJS):**
+   * **Tracing:** Use the `@opentelemetry/sdk-node` and auto-instrumentation packages (e.g., `@opentelemetry/instrumentation-http`, `@opentelemetry/instrumentation-express`, `@opentelemetry/instrumentation-pg`). Configure the Node SDK to export traces to the OTel Collector endpoint (usually via OTLP over gRPC/HTTP).
+   * **Logging:** Configure **Pino** to output structured JSON. Crucially, the Pino configuration must inject the `trace_id` and `span_id` provided by the current OpenTelemetry context into every log entry.
+   * **Metrics:** Use `@willsoto/nestjs-prometheus` to expose a `/metrics` endpoint on each service, which Prometheus/Mimir will scrape, or push metrics directly via OTel.
+
+3. **Log Shipping:**
+   * Configure the Docker daemon logging driver to use `loki` (via the Loki Docker Driver plugin) or use a sidecar agent like **Promtail** to read the stdout of your NestJS containers and push the JSON logs to Loki.
+
+4. **Grafana Configuration & Usage:**
+   * **Data Sources:** In Grafana, configure Loki, Tempo, and Mimir as Data Sources.
+   * **Derived Fields:** In the Loki data source settings, configure a "Derived Field" that parses the `trace_id` from the JSON logs and creates a direct internal link to the Tempo data source.
+   * **Developer Workflow:**
+     * A developer receives an alert or customer complaint.
+     * They open Grafana and query **Loki** for the error log (e.g., `{app="customer-service"} |= "error"`).
+     * Because logs contain the injected `trace_id`, Grafana displays a clickable button next to the log line.
+     * Clicking the button seamlessly transitions the developer to **Tempo**, visualizing the entire distributed trace waterfall across the Gateway, Auth, and Customer services, instantly identifying which specific microservice request failed and caused the error.
+
 ---
 
 ## 2. Exception Handling
