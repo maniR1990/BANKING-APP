@@ -72,13 +72,13 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: admin
       DB_NAME: banking_customer
-      PORT: 3000
+      PORT: 3002
     depends_on:
       postgres:
         condition: service_healthy
     healthcheck:
       # Matches app.setGlobalPrefix('api')
-      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
+      test: ['CMD', 'curl', '-f', 'http://localhost:3002/api/health']
       interval: 15s
       timeout: 5s
       retries: 3
