@@ -1,0 +1,258 @@
+{
+  "info": {
+    "_postman_id": "b0a51c47-1b3d-4c3e-99f5-19e99c1d0440",
+    "name": "Banking Microservices API",
+    "description": "Postman collection for the Banking Microservices project including Auth, Customer, and Account services exposed via Nginx Gateway.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Gateway Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "health"
+          ]
+        },
+        "description": "Check if the Nginx API Gateway is running."
+      },
+      "response": []
+    },
+    {
+      "name": "2. Auth Service",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Register a new user in the Auth service."
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login to receive an HTTP-Only session cookie (stored in Redis)."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Logout and invalidate the session cookie."
+          },
+          "response": []
+        },
+        {
+          "name": "Auth Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "health"
+              ]
+            },
+            "description": "Direct health check endpoint for Auth Service."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Customer Service",
+      "item": [
+        {
+          "name": "Customer Service Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/customer/api/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "customer",
+                "api",
+                "health"
+              ]
+            },
+            "description": "Health check for Customer microservice. Bypasses auth."
+          },
+          "response": []
+        },
+        {
+          "name": "Customer GraphQL Endpoint",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query {\n  # Example query for customer service\n  _service {\n    sdl\n  }\n}",
+                "variables": ""
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/customer/graphql",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "customer",
+                "graphql"
+              ]
+            },
+            "description": "GraphQL endpoint for Customer service. Protected by Nginx internal auth validation."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Account Service",
+      "item": [
+        {
+          "name": "Account Service Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/account/api/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "api",
+                "health"
+              ]
+            },
+            "description": "Health check for Account microservice. Bypasses auth."
+          },
+          "response": []
+        },
+        {
+          "name": "Account API Root",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/account/api/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "api",
+                ""
+              ]
+            },
+            "description": "Root endpoint for Account service API. Protected by Nginx internal auth validation."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost",
+      "type": "string"
+    }
+  ]
+}
