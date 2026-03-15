@@ -29,14 +29,31 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   async getSession(sessionId: string) {
     const sessionData = await this.redisClient.get(`session:${sessionId}`);
-    if (sessionData) {
-      await this.redisClient.expire(`session:${sessionId}`, 300); // Reset TTL on access (optional)
-    }
     return sessionData ? JSON.parse(sessionData) : null;
+  }
+
+  async refreshSession(sessionId: string, expiresInSeconds: number) {
+    await this.redisClient.expire(`session:${sessionId}`, expiresInSeconds);
   }
 
   async deleteSession(sessionId: string) {
     await this.redisClient.del(`session:${sessionId}`);
+  }
+
+  async invalidateAllSessionsForUser(userId: string) {
+    // Note: In a production app, it's better to store a reverse lookup mapping
+    // of userId -> Set of sessionIds, or index them.
+    // For simplicity, we are scanning all sessions.
+    const keys = await this.redisClient.keys('session:*');
+    for (const key of keys) {
+      const sessionData = await this.redisClient.get(key);
+      if (sessionData) {
+        const parsed = JSON.parse(sessionData);
+        if (parsed.userId === userId) {
+          await this.redisClient.del(key);
+        }
+      }
+    }
   }
 
   async onModuleDestroy() {
