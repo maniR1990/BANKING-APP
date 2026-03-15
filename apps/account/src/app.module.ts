@@ -3,6 +3,7 @@ import { Controller, Get, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccountModule } from './app/account.module'; // Your feature module
 import { Account } from './entities/account.entity';
+import { AppLoggerModule } from 'common';
 
 @Controller('health')
 export class HealthController {
@@ -14,6 +15,7 @@ export class HealthController {
 
 @Module({
   imports: [
+    AppLoggerModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
