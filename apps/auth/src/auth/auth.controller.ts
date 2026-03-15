@@ -85,14 +85,17 @@ export class AuthController {
     // Clear current cookie
     res.clearCookie('banking_session');
 
-    return { message: 'Password changed successfully, all sessions invalidated' };
+    return {
+      message: 'Password changed successfully, all sessions invalidated',
+    };
   }
 
   @Post('forgot-password')
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
     await this.authService.forgotPassword(forgotPasswordDto.email);
     return {
-      message: 'If an account with that email exists, a password reset link has been sent.',
+      message:
+        'If an account with that email exists, a password reset link has been sent.',
     };
   }
 

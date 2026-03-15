@@ -4,9 +4,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
 import { User } from './entities/user.entity';
+import { AppLoggerModule } from 'common';
 
 @Module({
   imports: [
+    AppLoggerModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       // We use the env variable, but fall back to the docker service name

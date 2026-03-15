@@ -9,9 +9,11 @@ import { CustomerController } from './customer.controller';
 import { CustomerService } from './customer.service';
 import { Customer } from './entities/customer.entity';
 import { CustomerResolver } from './customer.resolver';
+import { AppLoggerModule } from 'common';
 
 @Module({
   imports: [
+    AppLoggerModule,
     // 1. Load the .env file globally
     ConfigModule.forRoot({
       isGlobal: true, // Makes config available everywhere
