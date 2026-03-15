@@ -86,6 +86,64 @@
           "response": []
         },
         {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "change-password"
+              ]
+            },
+            "description": "Change password for the logged-in user and invalidate sessions."
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "description": "Request a password reset link."
+          },
+          "response": []
+        },
+        {
           "name": "Logout User",
           "request": {
             "method": "POST",
@@ -179,6 +237,68 @@
             "description": "GraphQL endpoint for Customer service. Protected by Nginx internal auth validation."
           },
           "response": []
+        },
+        {
+          "name": "Create Customer (REST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"address\": \"123 Main St\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/customer/api/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "customer",
+                "api",
+                ""
+              ]
+            },
+            "description": "REST endpoint to create a customer."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Customer (GraphQL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation {\n  createCustomer(data: {\n    name: \"John Doe\",\n    email: \"john@example.com\",\n    address: \"123 Main St\"\n  }) {\n    id\n    name\n    email\n  }\n}",
+                "variables": ""
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/customer/graphql",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "customer",
+                "graphql"
+              ]
+            },
+            "description": "GraphQL mutation to create a customer."
+          },
+          "response": []
         }
       ]
     },
@@ -222,6 +342,108 @@
               ]
             },
             "description": "Root endpoint for Account service API. Protected by Nginx internal auth validation."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Account",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/account/api/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "api",
+                "1"
+              ]
+            },
+            "description": "Get account details by ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Add Money",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"customer\": { \"id\": \"1\" }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/account/api/1/add",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "api",
+                "1",
+                "add"
+              ]
+            },
+            "description": "Add money to an account."
+          },
+          "response": []
+        },
+        {
+          "name": "Withdraw Money",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50,\n  \"customer\": { \"id\": \"1\" }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/account/api/1/withdraw",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "api",
+                "1",
+                "withdraw"
+              ]
+            },
+            "description": "Withdraw money from an account."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Account",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/account/api/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "api",
+                "1"
+              ]
+            },
+            "description": "Delete an account by ID."
           },
           "response": []
         }

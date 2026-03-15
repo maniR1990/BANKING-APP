@@ -51,4 +51,18 @@ export class AuthService {
 
     return await this.usersRepository.save(user);
   }
+
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.usersRepository.findOne({ where: { email } });
+    if (!user) {
+      // For security, don't reveal that the user doesn't exist
+      return;
+    }
+
+    // In a real application, you would generate a secure token here,
+    // save it to the database with an expiration time,
+    // and send an email to the user with a link containing the token.
+    // For now, this is a mock implementation.
+    console.log(`Mock: Password reset requested for ${email}`);
+  }
 }
