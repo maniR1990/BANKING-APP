@@ -162,7 +162,7 @@
             "body": {
               "mode": "graphql",
               "graphql": {
-                "query": "query {\n  # Example query for customer service\n  _service {\n    sdl\n  }\n}",
+                "query": "query {\n  customers {\n    id\n    name\n    email\n  }\n}",
                 "variables": ""
               }
             },

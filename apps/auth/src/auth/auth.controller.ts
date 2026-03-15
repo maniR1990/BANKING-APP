@@ -88,7 +88,7 @@ export class AuthController {
     return { message: 'Password changed successfully, all sessions invalidated' };
   }
 
-  @Delete('logout')
+  @Post('logout')
   async logout(
     @Req() req: express.Request,
     @Res({ passthrough: true }) res: express.Response,
