@@ -21,7 +21,7 @@ async function bootstrap() {
 
   // Required for reading the banking_session cookie
   app.use(cookieParser());
-
+  
   // Enable the DTO validation globally
   app.useGlobalPipes(
     new ValidationPipe({

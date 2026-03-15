@@ -1,12 +1,12 @@
 import { NestFactory, HttpAdapterHost } from '@nestjs/core';
-import { CustomerModule } from './customer.module';
+import { AppModule } from './app.module';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { GlobalExceptionFilter, AppLoggerModule } from 'common';
 import { Logger as PinoLogger } from 'nestjs-pino';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap'); // Principal Tip: Use Nest's Logger for startup
-  const app = await NestFactory.create(CustomerModule, { bufferLogs: true });
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   // Use the shared Pino logger
   app.useLogger(app.get(PinoLogger));
@@ -29,7 +29,7 @@ async function bootstrap() {
     }),
   );
 
-  const port = process.env.PORT ?? 3002;
+  const port = process.env.PORT ?? 3000;
   await app.listen(port);
 
   logger.log(
