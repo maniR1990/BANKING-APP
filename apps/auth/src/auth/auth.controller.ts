@@ -44,7 +44,7 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
-      maxAge: 300000, // 1 hour
+      maxAge: 3600000, // 1 hour
     });
 
     return { userId: user.id, message: 'Login successful' };
@@ -59,6 +59,33 @@ export class AuthController {
       message: 'User created successfully',
       userId: user.id,
     };
+  }
+
+  @Post('change-password')
+  async changePassword(
+    @Req() req: express.Request,
+    @Res({ passthrough: true }) res: express.Response,
+  ) {
+    const sessionId = req.cookies['banking_session'];
+    if (!sessionId) {
+      throw new UnauthorizedException('Not logged in');
+    }
+
+    const sessionData = await this.redisService.getSession(sessionId);
+    if (!sessionData || !sessionData.userId) {
+      throw new UnauthorizedException('Invalid session');
+    }
+
+    // In a real app, you would validate the old password, hash the new one, and update the DB here.
+    // await this.authService.changePassword(sessionData.userId, newPassword);
+
+    // Invalidate all active sessions for this user ID from Redis
+    await this.redisService.invalidateAllSessionsForUser(sessionData.userId);
+
+    // Clear current cookie
+    res.clearCookie('banking_session');
+
+    return { message: 'Password changed successfully, all sessions invalidated' };
   }
 
   @Delete('logout')
@@ -86,13 +113,24 @@ export class AuthController {
       return res.status(401).send('Unauthorized');
     }
 
-    const userId = await this.redisService.getSession(sessionId);
-    if (!userId) {
+    const sessionData = await this.redisService.getSession(sessionId);
+    if (!sessionData || !sessionData.userId) {
       return res.status(401).send('Unauthorized');
     }
 
+    // Refresh session TTL in Redis
+    await this.redisService.refreshSession(sessionId, 3600);
+
+    // Refresh cookie expiration
+    res.cookie('banking_session', sessionId, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 3600000, // 1 hour
+    });
+
     // 200 tells Nginx to ALLOW the proxy request.
     // We attach the X-User-ID header so Nginx can pass it to the Account/Customer services!
-    return res.status(200).header('X-User-ID', userId).send();
+    return res.status(200).header('X-User-ID', sessionData.userId).send();
   }
 }
