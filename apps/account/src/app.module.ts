@@ -1,10 +1,12 @@
 // Example for Account Service (Apply similar logic to Customer)
 import { Controller, Get, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_GUARD } from '@nestjs/core';
 import { AccountModule } from './app/account.module'; // Your feature module
 import { Account } from './entities/account.entity';
-import { AppLoggerModule } from 'common';
+import { AppLoggerModule, GatewayAuthGuard, Public } from 'common';
 
+@Public()
 @Controller('health')
 export class HealthController {
   @Get()
@@ -29,5 +31,11 @@ export class HealthController {
     AccountModule,
   ],
   controllers: [HealthController],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: GatewayAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
