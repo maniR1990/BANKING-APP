@@ -27,6 +27,7 @@ import { AppLoggerModule } from 'common';
       sortSchema: true,
       playground: true, // Enables the browser-based IDE for testing
       path: '/graphql',
+      context: ({ req }) => ({ req }), // Explicitly pass the req object
     }),
 
     // 2. Connect to the Database using the config

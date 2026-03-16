@@ -1,10 +1,12 @@
 import { Controller, Get, Post, Delete, Body, Param } from '@nestjs/common';
 import { AccountService } from './account.service';
+import { Public, CurrentUser } from 'common';
 
 @Controller()
 export class AccountController {
   constructor(private readonly accountService: AccountService) {}
 
+  @Public()
   @Get()
   getApiRoot() {
     return {
@@ -13,6 +15,7 @@ export class AccountController {
     };
   }
 
+  @Public()
   @Get('health')
   healthCheck() {
     return {
@@ -24,7 +27,8 @@ export class AccountController {
   }
 
   @Get(':id')
-  getAccount(@Param('id') id: string) {
+  getAccount(@Param('id') id: string, @CurrentUser() user: any) {
+    // We optionally use user context here
     return this.accountService.getAccount(id);
   }
 
@@ -32,7 +36,10 @@ export class AccountController {
   addMoney(
     @Param('id') id: string,
     @Body() body: { amount: number; customer: any },
+    @CurrentUser() user: any,
   ) {
+    // If you need to map body.customer to user.id, you can do it here.
+    // Using user.id directly if applicable ensures security.
     return this.accountService.addMoney(id, body.amount, body.customer);
   }
 
@@ -40,12 +47,13 @@ export class AccountController {
   withdraw(
     @Param('id') id: string,
     @Body() body: { amount: number; customer: any },
+    @CurrentUser() user: any,
   ) {
     return this.accountService.withdrawMoney(id, body.amount, body.customer);
   }
 
   @Delete(':id')
-  deleteAccount(@Param('id') id: string) {
+  deleteAccount(@Param('id') id: string, @CurrentUser() user: any) {
     return this.accountService.deleteAccount(id);
   }
 }

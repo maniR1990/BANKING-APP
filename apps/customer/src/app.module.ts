@@ -1,9 +1,12 @@
 import { Controller, Get, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_GUARD } from '@nestjs/core';
 import { CustomerModule } from './customer.module'; // Your feature module
 import { Customer } from './entities/customer.entity';
+import { GatewayAuthGuard, Public } from 'common';
 
 // --- ADD THIS BLOCK ---
+@Public()
 @Controller('health')
 export class HealthController {
   @Get()
@@ -28,5 +31,11 @@ export class HealthController {
     CustomerModule,
   ],
   controllers: [HealthController],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: GatewayAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
