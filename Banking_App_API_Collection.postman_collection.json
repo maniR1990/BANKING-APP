@@ -13,12 +13,8 @@
         "header": [],
         "url": {
           "raw": "{{base_url}}/health",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "health"
-          ]
+          "host": ["{{base_url}}"],
+          "path": ["health"]
         },
         "description": "Check if the Nginx API Gateway is running."
       },
@@ -29,6 +25,19 @@
       "item": [
         {
           "name": "Register User",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const uniqueId = Date.now();",
+                  "pm.collectionVariables.set('dynamicEmail', `user_${uniqueId}@example.com`);",
+                  "pm.collectionVariables.set('dynamicPassword', 'Password123!');"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -40,19 +49,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Password123!\"\n}"
+              "raw": "{\n  \"email\": \"{{dynamicEmail}}\",\n  \"password\": \"{{dynamicPassword}}\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/register",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "auth",
-                "register"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
             },
-            "description": "Register a new user in the Auth service."
+            "description": "Register a new user with a dynamically generated email to prevent duplicate constraint errors."
           },
           "response": []
         },
@@ -69,48 +73,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Password123!\"\n}"
+              "raw": "{\n  \"email\": \"{{dynamicEmail}}\",\n  \"password\": \"{{dynamicPassword}}\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/login",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "auth",
-                "login"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
             },
-            "description": "Login to receive an HTTP-Only session cookie (stored in Redis)."
-          },
-          "response": []
-        },
-        {
-          "name": "Change Password",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"oldPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword123!\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/auth/change-password",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "auth",
-                "change-password"
-              ]
-            },
-            "description": "Change password for the logged-in user and invalidate sessions."
+            "description": "Login using the dynamically generated email from the Register step."
           },
           "response": []
         },
@@ -127,38 +97,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"testuser@example.com\"\n}"
+              "raw": "{\n  \"email\": \"{{dynamicEmail}}\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/forgot-password",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "auth",
-                "forgot-password"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["auth", "forgot-password"]
             },
             "description": "Request a password reset link."
-          },
-          "response": []
-        },
-        {
-          "name": "Logout User",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/auth/logout",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "auth",
-                "logout"
-              ]
-            },
-            "description": "Logout and invalidate the session cookie."
           },
           "response": []
         },
@@ -169,13 +115,8 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/auth/health",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "auth",
-                "health"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["auth", "health"]
             },
             "description": "Direct health check endpoint for Auth Service."
           },
@@ -193,14 +134,8 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/customer/api/health",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "customer",
-                "api",
-                "health"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["customer", "api", "health"]
             },
             "description": "Health check for Customer microservice. Bypasses auth."
           },
@@ -226,15 +161,10 @@
             },
             "url": {
               "raw": "{{base_url}}/customer/graphql",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "customer",
-                "graphql"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["customer", "graphql"]
             },
-            "description": "GraphQL endpoint for Customer service. Protected by Nginx internal auth validation."
+            "description": "GraphQL endpoint for Customer service."
           },
           "response": []
         },
@@ -251,20 +181,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"address\": \"123 Main St\"\n}"
+              "raw": "{\n  \"name\": \"{{$randomFullName}}\",\n  \"email\": \"{{dynamicEmail}}\",\n  \"address\": \"{{$randomStreetAddress}}\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/customer/api/",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "customer",
-                "api",
-                ""
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["customer", "api", ""]
             },
-            "description": "REST endpoint to create a customer."
+            "description": "REST endpoint to create a customer using dynamic faker data."
           },
           "response": []
         },
@@ -282,21 +206,16 @@
             "body": {
               "mode": "graphql",
               "graphql": {
-                "query": "mutation {\n  createCustomer(data: {\n    name: \"John Doe\",\n    email: \"john@example.com\",\n    address: \"123 Main St\"\n  }) {\n    id\n    name\n    email\n  }\n}",
+                "query": "mutation {\n  createCustomer(data: {\n    name: \"{{$randomFullName}}\",\n    email: \"{{dynamicEmail}}\",\n    address: \"{{$randomStreetAddress}}\"\n  }) {\n    id\n    name\n    email\n  }\n}",
                 "variables": ""
               }
             },
             "url": {
               "raw": "{{base_url}}/customer/graphql",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "customer",
-                "graphql"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["customer", "graphql"]
             },
-            "description": "GraphQL mutation to create a customer."
+            "description": "GraphQL mutation to create a customer using dynamic faker data."
           },
           "response": []
         }
@@ -312,14 +231,8 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/account/api/health",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "account",
-                "api",
-                "health"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["account", "api", "health"]
             },
             "description": "Health check for Account microservice. Bypasses auth."
           },
@@ -332,16 +245,10 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/account/api/",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "account",
-                "api",
-                ""
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["account", "api", ""]
             },
-            "description": "Root endpoint for Account service API. Protected by Nginx internal auth validation."
+            "description": "Root endpoint for Account service API."
           },
           "response": []
         },
@@ -352,14 +259,8 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/account/api/1",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "account",
-                "api",
-                "1"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["account", "api", "1"]
             },
             "description": "Get account details by ID."
           },
@@ -382,15 +283,8 @@
             },
             "url": {
               "raw": "{{base_url}}/account/api/1/add",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "account",
-                "api",
-                "1",
-                "add"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["account", "api", "1", "add"]
             },
             "description": "Add money to an account."
           },
@@ -413,15 +307,8 @@
             },
             "url": {
               "raw": "{{base_url}}/account/api/1/withdraw",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "account",
-                "api",
-                "1",
-                "withdraw"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["account", "api", "1", "withdraw"]
             },
             "description": "Withdraw money from an account."
           },
@@ -434,16 +321,53 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/account/api/1",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "account",
-                "api",
-                "1"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["account", "api", "1"]
             },
             "description": "Delete an account by ID."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Auth Logout & Teardown",
+      "item": [
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"{{dynamicPassword}}\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/change-password",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "change-password"]
+            },
+            "description": "Change password for the logged-in user and invalidate sessions."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Logout and invalidate the session cookie."
           },
           "response": []
         }
@@ -457,32 +381,6 @@
           "item": [
             {
               "name": "Register User",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Password123!\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/auth/register",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "auth",
-                    "register"
-                  ]
-                },
-                "description": "Register a new user in the Auth service."
-              },
-              "response": [],
               "event": [
                 {
                   "listen": "test",
@@ -494,11 +392,19 @@
                       "});"
                     ]
                   }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const uniqueId = Date.now();",
+                      "pm.collectionVariables.set('dynamicEmail', `user_${uniqueId}@example.com`);",
+                      "pm.collectionVariables.set('dynamicPassword', 'Password123!');"
+                    ]
+                  }
                 }
-              ]
-            },
-            {
-              "name": "Login User",
+              ],
               "request": {
                 "method": "POST",
                 "header": [
@@ -510,21 +416,19 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Password123!\"\n}"
+                  "raw": "{\n  \"email\": \"{{dynamicEmail}}\",\n  \"password\": \"{{dynamicPassword}}\"\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/auth/login",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "auth",
-                    "login"
-                  ]
+                  "raw": "{{base_url}}/auth/register",
+                  "host": ["{{base_url}}"],
+                  "path": ["auth", "register"]
                 },
-                "description": "Login to receive an HTTP-Only session cookie (stored in Redis)."
+                "description": "Register a new user in the Auth service."
               },
-              "response": [],
+              "response": []
+            },
+            {
+              "name": "Login User",
               "event": [
                 {
                   "listen": "test",
@@ -540,27 +444,31 @@
                     ]
                   }
                 }
-              ]
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{dynamicEmail}}\",\n  \"password\": \"{{dynamicPassword}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/auth/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["auth", "login"]
+                },
+                "description": "Login to receive an HTTP-Only session cookie."
+              },
+              "response": []
             },
             {
               "name": "Account API Root",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/account/api/",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "account",
-                    "api",
-                    ""
-                  ]
-                },
-                "description": "Root endpoint for Account service API. Protected by Nginx internal auth validation."
-              },
-              "response": [],
               "event": [
                 {
                   "listen": "test",
@@ -573,37 +481,21 @@
                     ]
                   }
                 }
-              ]
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/account/api/",
+                  "host": ["{{base_url}}"],
+                  "path": ["account", "api", ""]
+                },
+                "description": "Root endpoint for Account service API."
+              },
+              "response": []
             },
             {
               "name": "Create Customer (REST)",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"address\": \"123 Main St\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/customer/api/",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "customer",
-                    "api",
-                    ""
-                  ]
-                },
-                "description": "REST endpoint to create a customer."
-              },
-              "response": [],
               "event": [
                 {
                   "listen": "test",
@@ -616,26 +508,31 @@
                     ]
                   }
                 }
-              ]
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"{{$randomFullName}}\",\n  \"email\": \"{{dynamicEmail}}\",\n  \"address\": \"{{$randomStreetAddress}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/customer/api/",
+                  "host": ["{{base_url}}"],
+                  "path": ["customer", "api", ""]
+                },
+                "description": "REST endpoint to create a customer."
+              },
+              "response": []
             },
             {
               "name": "Logout User",
-              "request": {
-                "method": "POST",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/auth/logout",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "auth",
-                    "logout"
-                  ]
-                },
-                "description": "Logout and invalidate the session cookie."
-              },
-              "response": [],
               "event": [
                 {
                   "listen": "test",
@@ -648,7 +545,18 @@
                     ]
                   }
                 }
-              ]
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/auth/logout",
+                  "host": ["{{base_url}}"],
+                  "path": ["auth", "logout"]
+                },
+                "description": "Logout and invalidate the session cookie."
+              },
+              "response": []
             }
           ]
         },
@@ -657,23 +565,6 @@
           "item": [
             {
               "name": "Account API Root",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/account/api/",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "account",
-                    "api",
-                    ""
-                  ]
-                },
-                "description": "Root endpoint for Account service API. Protected by Nginx internal auth validation."
-              },
-              "response": [],
               "event": [
                 {
                   "listen": "test",
@@ -686,10 +577,34 @@
                     ]
                   }
                 }
-              ]
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/account/api/",
+                  "host": ["{{base_url}}"],
+                  "path": ["account", "api", ""]
+                },
+                "description": "Root endpoint for Account service API."
+              },
+              "response": []
             },
             {
               "name": "Create Customer (REST)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 401\", function () {",
+                      "    pm.response.to.have.status(401);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
               "request": {
                 "method": "POST",
                 "header": [
@@ -701,38 +616,36 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"address\": \"123 Main St\"\n}"
+                  "raw": "{\n  \"name\": \"{{$randomFullName}}\",\n  \"email\": \"{{dynamicEmail}}\",\n  \"address\": \"{{$randomStreetAddress}}\"\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/customer/api/",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "customer",
-                    "api",
-                    ""
-                  ]
+                  "host": ["{{base_url}}"],
+                  "path": ["customer", "api", ""]
                 },
                 "description": "REST endpoint to create a customer."
               },
-              "response": [],
+              "response": []
+            },
+            {
+              "name": "Customer GraphQL Endpoint",
               "event": [
                 {
                   "listen": "test",
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test(\"Status code is 401\", function () {",
-                      "    pm.response.to.have.status(401);",
+                      "pm.test(\"Status code is 401 or expected error\", function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([401, 200]);",
+                      "    if(pm.response.code === 200) {",
+                      "        const jsonData = pm.response.json();",
+                      "        pm.expect(jsonData.errors).to.exist;",
+                      "    }",
                       "});"
                     ]
                   }
                 }
-              ]
-            },
-            {
-              "name": "Customer GraphQL Endpoint",
+              ],
               "request": {
                 "method": "POST",
                 "header": [
@@ -751,34 +664,12 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/customer/graphql",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "customer",
-                    "graphql"
-                  ]
+                  "host": ["{{base_url}}"],
+                  "path": ["customer", "graphql"]
                 },
-                "description": "GraphQL endpoint for Customer service. Protected by Nginx internal auth validation."
+                "description": "GraphQL endpoint for Customer service."
               },
-              "response": [],
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "pm.test(\"Status code is 401 or expected error\", function () {",
-                      "    pm.expect(pm.response.code).to.be.oneOf([401, 200]);",
-                      "    if(pm.response.code === 200) {",
-                      "        const jsonData = pm.response.json();",
-                      "        pm.expect(jsonData.errors).to.exist;",
-                      "    }",
-                      "});"
-                    ]
-                  }
-                }
-              ]
+              "response": []
             }
           ]
         }
@@ -790,18 +681,14 @@
       "listen": "prerequest",
       "script": {
         "type": "text/javascript",
-        "exec": [
-          ""
-        ]
+        "exec": [""]
       }
     },
     {
       "listen": "test",
       "script": {
         "type": "text/javascript",
-        "exec": [
-          ""
-        ]
+        "exec": [""]
       }
     }
   ],
@@ -809,6 +696,16 @@
     {
       "key": "base_url",
       "value": "http://localhost",
+      "type": "string"
+    },
+    {
+      "key": "dynamicEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "dynamicPassword",
+      "value": "",
       "type": "string"
     }
   ]
