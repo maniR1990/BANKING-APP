@@ -24,6 +24,7 @@ export class CustomerController {
     @CurrentUser() user: any,
   ) {
     const { name, email, address } = createCustomerDto;
+    console.log('Creating customer for user:', user?.id || 'anonymous'); // Debug log to verify user info
     // user is available via the gateway-auth guard
     return this.customerService.create(name, email, address);
   }

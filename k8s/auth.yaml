@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: banking-auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: banking-auth
+  template:
+    metadata:
+      labels:
+        app: banking-auth
+    spec:
+      containers:
+        - name: auth
+          image: banking-app-auth-service:latest
+          imagePullPolicy: Never # Forces K8s to use your local Docker image
+          ports:
+            - containerPort: 3000
+          env:
+            - name: PORT
+              value: '3000'
+            - name: REDIS_HOST
+              value: 'banking-redis'
+            - name: DB_HOST
+              value: 'banking-postgres'
+            - name: DB_PORT
+              value: '5432'
+            - name: DB_USERNAME
+              value: 'postgres'
+            - name: DB_PASSWORD
+              value: 'admin'
+            - name: DB_NAME
+              value: 'banking_auth'
+          # Translating your Docker Compose curl healthcheck to a native K8s HTTP probe
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: banking-auth
+spec:
+  selector:
+    app: banking-auth
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP

@@ -1,0 +1,41 @@
+# 1. Deployment for the Redis container
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: banking-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: banking-redis
+  template:
+    metadata:
+      labels:
+        app: banking-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          # Translating your Docker Compose Healthcheck
+          readinessProbe:
+            exec:
+              command: ['redis-cli', 'ping']
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+---
+# 2. Service to expose Redis internally
+apiVersion: v1
+kind: Service
+metadata:
+  name: banking-redis
+spec:
+  selector:
+    app: banking-redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+  type: ClusterIP

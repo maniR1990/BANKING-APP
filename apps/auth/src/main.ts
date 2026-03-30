@@ -8,9 +8,22 @@ import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter, AppLoggerModule } from 'common';
 import { Logger as PinoLogger } from 'nestjs-pino';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
+
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('Banking Auth Service')
+      .setDescription('Internal API for Authentication')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document);
+  }
 
   // Use the shared Pino logger
   app.useLogger(app.get(PinoLogger));
@@ -21,7 +34,7 @@ async function bootstrap() {
 
   // Required for reading the banking_session cookie
   app.use(cookieParser());
-  
+
   // Enable the DTO validation globally
   app.useGlobalPipes(
     new ValidationPipe({
