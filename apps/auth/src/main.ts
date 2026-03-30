@@ -18,7 +18,7 @@ async function bootstrap() {
       .setTitle('Banking Auth Service')
       .setDescription('Internal API for Authentication')
       .setVersion('1.0')
-      .addBearerAuth()
+      .addCookieAuth('banking_session')
       .build();
 
     const document = SwaggerModule.createDocument(app, config);

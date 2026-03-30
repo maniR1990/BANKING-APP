@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { GlobalExceptionFilter, AppLoggerModule } from 'common';
 import { Logger as PinoLogger } from 'nestjs-pino';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -22,6 +23,18 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('Banking Account Service')
+      .setDescription('Internal API for Accounts')
+      .setVersion('1.0')
+      .addApiKey({ type: 'apiKey', name: 'X-User-ID', in: 'header' }, 'X-User-ID')
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document);
+  }
+
   const port = process.env.PORT || 3001; // Ensure this is different from Customer service
   await app.listen(port);
   logger.log(`🚀 Account service is running on: http://localhost:${port}/api`);

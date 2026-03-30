@@ -10,12 +10,14 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiCookieAuth } from '@nestjs/swagger';
 import * as express from 'express';
 import { v4 as uuid4 } from 'uuid';
 import { AuthService } from './auth.service';
 import { RedisService } from './../redis/redis.service';
 import { LoginDto, RegisterDto, ForgotPasswordDto } from '../dto/login.dto';
 
+@ApiTags('Auth')
 @Controller('auth')
 @UsePipes(new ValidationPipe({ whitelist: true })) // Security: Strips non-DTO properties
 export class AuthController {
@@ -25,6 +27,10 @@ export class AuthController {
   ) {}
 
   @Post('login')
+  @ApiOperation({ summary: 'Log in to the application' })
+  @ApiBody({ type: LoginDto })
+  @ApiResponse({ status: 201, description: 'Login successful, returns session cookie and user ID.' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials.' })
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: express.Response,
@@ -52,6 +58,10 @@ export class AuthController {
 
   @Post('register')
   @UsePipes(new ValidationPipe({ whitelist: true }))
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiBody({ type: RegisterDto })
+  @ApiResponse({ status: 201, description: 'User created successfully.' })
+  @ApiResponse({ status: 409, description: 'Email already registered.' })
   async register(@Body() registerDto: RegisterDto) {
     const user = await this.authService.register(registerDto);
 
@@ -62,6 +72,10 @@ export class AuthController {
   }
 
   @Post('change-password')
+  @ApiOperation({ summary: 'Change user password' })
+  @ApiCookieAuth('banking_session')
+  @ApiResponse({ status: 201, description: 'Password changed successfully, all sessions invalidated.' })
+  @ApiResponse({ status: 401, description: 'Not logged in or invalid session.' })
   async changePassword(
     @Req() req: express.Request,
     @Res({ passthrough: true }) res: express.Response,
@@ -91,6 +105,9 @@ export class AuthController {
   }
 
   @Post('forgot-password')
+  @ApiOperation({ summary: 'Request password reset' })
+  @ApiBody({ type: ForgotPasswordDto })
+  @ApiResponse({ status: 201, description: 'Password reset link sent (mocked).' })
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
     await this.authService.forgotPassword(forgotPasswordDto.email);
     return {
@@ -100,6 +117,9 @@ export class AuthController {
   }
 
   @Post('logout')
+  @ApiOperation({ summary: 'Log out of the application' })
+  @ApiCookieAuth('banking_session')
+  @ApiResponse({ status: 201, description: 'Logout successful.' })
   async logout(
     @Req() req: express.Request,
     @Res({ passthrough: true }) res: express.Response,
@@ -113,6 +133,10 @@ export class AuthController {
   }
 
   @Get('validate')
+  @ApiOperation({ summary: 'Internal endpoint to validate session for NGINX auth_request guard' })
+  @ApiCookieAuth('banking_session')
+  @ApiResponse({ status: 200, description: 'Session valid, returns X-User-ID header.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async validateToken(
     @Req() req: express.Request,
     @Res() res: express.Response,
