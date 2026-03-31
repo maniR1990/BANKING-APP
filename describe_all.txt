@@ -1,0 +1,67 @@
+Name:             banking-account-docs-ingress
+Labels:           <none>
+Namespace:        default
+Address:          localhost
+Ingress Class:    nginx
+Default backend:  <default>
+Rules:
+  Host        Path  Backends
+  ----        ----  --------
+  localhost   
+              /public/account/api/docs        banking-account:3001 (10.1.0.82:3001)
+              /public/account/api/docs-json   banking-account:3001 (10.1.0.82:3001)
+Annotations:  nginx.ingress.kubernetes.io/cors-allow-credentials: true
+              nginx.ingress.kubernetes.io/cors-allow-methods: PUT, GET, POST, OPTIONS, DELETE, PATCH
+              nginx.ingress.kubernetes.io/cors-allow-origin: http://localhost:8080
+              nginx.ingress.kubernetes.io/enable-cors: true
+Events:
+  Type    Reason  Age                From                      Message
+  ----    ------  ----               ----                      -------
+  Normal  Sync    35m (x4 over 13h)  nginx-ingress-controller  Scheduled for sync
+  Normal  Sync    58s (x3 over 34m)  nginx-ingress-controller  Scheduled for sync
+
+
+Name:             banking-account-health-ingress
+Labels:           <none>
+Namespace:        default
+Address:          localhost
+Ingress Class:    nginx
+Default backend:  <default>
+Rules:
+  Host        Path  Backends
+  ----        ----  --------
+  *           
+              /public/account/health   banking-account:3001 (10.1.0.82:3001)
+Annotations:  nginx.ingress.kubernetes.io/cors-allow-headers: Accept, Content-Type
+              nginx.ingress.kubernetes.io/cors-allow-methods: GET, OPTIONS
+              nginx.ingress.kubernetes.io/cors-allow-origin: http://localhost:8080
+              nginx.ingress.kubernetes.io/enable-cors: true
+              nginx.ingress.kubernetes.io/rewrite-target: /api/health
+Events:
+  Type    Reason  Age                From                      Message
+  ----    ------  ----               ----                      -------
+  Normal  Sync    35m (x3 over 72m)  nginx-ingress-controller  Scheduled for sync
+  Normal  Sync    16m (x2 over 34m)  nginx-ingress-controller  Scheduled for sync
+
+
+Name:             banking-customer-docs-ingress
+Labels:           <none>
+Namespace:        default
+Address:          localhost
+Ingress Class:    nginx
+Default backend:  <default>
+Rules:
+  Host        Path  Backends
+  ----        ----  --------
+  *           
+              /public/customer/api/docs        banking-customer:3002 (10.1.0.80:3002)
+              /public/customer/api/docs-json   banking-customer:3002 (10.1.0.80:3002)
+Annotations:  nginx.ingress.kubernetes.io/cors-allow-credentials: true
+              nginx.ingress.kubernetes.io/cors-allow-methods: PUT, GET, POST, OPTIONS, DELETE, PATCH
+              nginx.ingress.kubernetes.io/cors-allow-origin: http://localhost:8080
+              nginx.ingress.kubernetes.io/enable-cors: true
+Events:
+  Type    Reason  Age                From                      Message
+  ----    ------  ----               ----                      -------
+  Normal  Sync    35m (x4 over 13h)  nginx-ingress-controller  Scheduled for sync
+  Normal  Sync    16m (x2 over 34m)  nginx-ingress-controller  Scheduled for sync

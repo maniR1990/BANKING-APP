@@ -13,7 +13,6 @@ async function bootstrap() {
     ? [process.env.CORS_ORIGIN || 'https://your-production-domain.com']
     : ['http://localhost:8080', 'http://localhost']; // Allows local Swagger and local Frontend
 
-  // 2. Apply the dynamic rules
   app.enableCors({
     origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -43,7 +42,7 @@ async function bootstrap() {
       .addApiKey({ type: 'apiKey', name: 'X-User-ID', in: 'header' }, 'X-User-ID')
       .build();
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('account/api/docs', app, document);
+    SwaggerModule.setup('public/account/api/docs', app, document);
   }
 
   const port = process.env.PORT || 3001; // Ensure this is different from Customer service

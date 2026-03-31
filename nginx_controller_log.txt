@@ -1,0 +1,50 @@
+I0331 05:41:04.659204       7 event.go:377] Event(v1.ObjectReference{Kind:"Ingress", Namespace:"default", Name:"banking-customer-health-ingress", UID:"064734f7-3d32-4caf-b174-a2e02bac2a62", APIVersion:"networking.k8s.io/v1", ResourceVersion:"83497", FieldPath:""}): type: 'Normal' reason: 'Sync' Scheduled for sync
+I0331 05:41:04.659474       7 store.go:440] "Found valid IngressClass" ingress="default/banking-customer-ingress" ingressclass="nginx"
+I0331 05:41:04.659556       7 main.go:219] Current config.corsAllowOrigin [http://localhost:8080]
+I0331 05:41:04.659668       7 event.go:377] Event(v1.ObjectReference{Kind:"Ingress", Namespace:"default", Name:"banking-customer-ingress", UID:"1850d737-8561-4c44-83c3-aa2908f709bb", APIVersion:"networking.k8s.io/v1", ResourceVersion:"70502", FieldPath:""}): type: 'Normal' reason: 'Sync' Scheduled for sync
+I0331 05:41:04.659878       7 store.go:440] "Found valid IngressClass" ingress="default/global-health-ingress" ingressclass="nginx"
+I0331 05:41:04.659950       7 main.go:219] Current config.corsAllowOrigin [http://localhost:8080]
+I0331 05:41:04.660101       7 event.go:377] Event(v1.ObjectReference{Kind:"Ingress", Namespace:"default", Name:"global-health-ingress", UID:"838d4780-8ba4-4dc7-9a89-c5346ea4d67c", APIVersion:"networking.k8s.io/v1", ResourceVersion:"81512", FieldPath:""}): type: 'Normal' reason: 'Sync' Scheduled for sync
+I0331 05:41:04.748610       7 nginx.go:317] "Starting NGINX process"
+I0331 05:41:04.749232       7 leaderelection.go:257] attempting to acquire leader lease ingress-nginx/ingress-nginx-leader...
+I0331 05:41:04.749626       7 nginx.go:337] "Starting validation webhook" address=":8443" certPath="/usr/local/certificates/cert" keyPath="/usr/local/certificates/key"
+I0331 05:41:04.750049       7 controller.go:196] "Configuration changes detected, backend reload required"
+I0331 05:41:04.753110       7 status.go:85] "New leader elected" identity="ingress-nginx-controller-578dfc454b-8h4vr"
+I0331 05:41:04.816891       7 controller.go:216] "Backend successfully reloaded"
+I0331 05:41:04.817010       7 controller.go:227] "Initial sync, sleeping for 1 second"
+I0331 05:41:04.817102       7 event.go:377] Event(v1.ObjectReference{Kind:"Pod", Namespace:"ingress-nginx", Name:"ingress-nginx-controller-598945c5d4-4sbdx", UID:"f5920688-a584-415c-acda-ea6316ae2e2c", APIVersion:"v1", ResourceVersion:"83705", FieldPath:""}): type: 'Normal' reason: 'RELOAD' NGINX reload triggered due to a change in configuration
+I0331 05:41:52.648819       7 leaderelection.go:271] successfully acquired lease ingress-nginx/ingress-nginx-leader
+I0331 05:41:52.648856       7 status.go:85] "New leader elected" identity="ingress-nginx-controller-598945c5d4-4sbdx"
+I0331 05:47:16.227839       7 main.go:219] Current config.corsAllowOrigin [http://localhost:8080]
+I0331 05:47:16.227864       7 event.go:377] Event(v1.ObjectReference{Kind:"Ingress", Namespace:"default", Name:"banking-auth-health-ingress", UID:"c6e66153-6269-47c6-ab9a-3dec6fbcfddb", APIVersion:"networking.k8s.io/v1", ResourceVersion:"84468", FieldPath:""}): type: 'Normal' reason: 'Sync' Scheduled for sync
+I0331 05:47:16.228763       7 controller.go:196] "Configuration changes detected, backend reload required"
+I0331 05:47:16.342926       7 controller.go:216] "Backend successfully reloaded"
+I0331 05:47:16.343711       7 event.go:377] Event(v1.ObjectReference{Kind:"Pod", Namespace:"ingress-nginx", Name:"ingress-nginx-controller-598945c5d4-4sbdx", UID:"f5920688-a584-415c-acda-ea6316ae2e2c", APIVersion:"v1", ResourceVersion:"83705", FieldPath:""}): type: 'Normal' reason: 'RELOAD' NGINX reload triggered due to a change in configuration
+I0331 05:58:20.445496       7 event.go:377] Event(v1.ObjectReference{Kind:"Ingress", Namespace:"default", Name:"banking-account-docs-ingress", UID:"f1036139-d1d1-4189-b442-de8c0eccfdd5", APIVersion:"networking.k8s.io/v1", ResourceVersion:"85881", FieldPath:""}): type: 'Normal' reason: 'Sync' Scheduled for sync
+I0331 05:58:20.447808       7 main.go:219] Current config.corsAllowOrigin [http://localhost:8080]
+I0331 05:58:20.450363       7 controller.go:196] "Configuration changes detected, backend reload required"
+I0331 05:58:20.559890       7 main.go:219] Current config.corsAllowOrigin [http://localhost:8080]
+I0331 05:58:20.559888       7 event.go:377] Event(v1.ObjectReference{Kind:"Ingress", Namespace:"default", Name:"banking-account-health-ingress", UID:"52b325d4-68aa-436e-81ff-73b6f0263b30", APIVersion:"networking.k8s.io/v1", ResourceVersion:"85883", FieldPath:""}): type: 'Normal' reason: 'Sync' Scheduled for sync
+I0331 05:58:20.739423       7 controller.go:216] "Backend successfully reloaded"
+I0331 05:58:20.739924       7 event.go:377] Event(v1.ObjectReference{Kind:"Pod", Namespace:"ingress-nginx", Name:"ingress-nginx-controller-598945c5d4-4sbdx", UID:"f5920688-a584-415c-acda-ea6316ae2e2c", APIVersion:"v1", ResourceVersion:"83705", FieldPath:""}): type: 'Normal' reason: 'RELOAD' NGINX reload triggered due to a change in configuration
+I0331 05:58:21.203637       7 main.go:219] Current config.corsAllowOrigin [http://localhost:8080]
+I0331 05:58:21.203669       7 event.go:377] Event(v1.ObjectReference{Kind:"Ingress", Namespace:"default", Name:"banking-customer-docs-ingress", UID:"21160cb3-1e3e-41ff-b8ec-86233b3fffe3", APIVersion:"networking.k8s.io/v1", ResourceVersion:"85886", FieldPath:""}): type: 'Normal' reason: 'Sync' Scheduled for sync
+I0331 05:58:21.347983       7 event.go:377] Event(v1.ObjectReference{Kind:"Ingress", Namespace:"default", Name:"banking-customer-health-ingress", UID:"064734f7-3d32-4caf-b174-a2e02bac2a62", APIVersion:"networking.k8s.io/v1", ResourceVersion:"85888", FieldPath:""}): type: 'Normal' reason: 'Sync' Scheduled for sync
+I0331 05:58:21.351296       7 main.go:219] Current config.corsAllowOrigin [http://localhost:8080]
+I0331 05:58:23.765983       7 controller.go:196] "Configuration changes detected, backend reload required"
+I0331 05:58:23.929640       7 controller.go:216] "Backend successfully reloaded"
+I0331 05:58:23.930073       7 event.go:377] Event(v1.ObjectReference{Kind:"Pod", Namespace:"ingress-nginx", Name:"ingress-nginx-controller-598945c5d4-4sbdx", UID:"f5920688-a584-415c-acda-ea6316ae2e2c", APIVersion:"v1", ResourceVersion:"83705", FieldPath:""}): type: 'Normal' reason: 'RELOAD' NGINX reload triggered due to a change in configuration
+I0331 06:11:21.020193       7 store.go:440] "Found valid IngressClass" ingress="default/banking-auth-docs-ingress" ingressclass="nginx"
+I0331 06:11:21.022765       7 event.go:377] Event(v1.ObjectReference{Kind:"Ingress", Namespace:"default", Name:"banking-auth-docs-ingress", UID:"abc1b980-6c4b-44e4-b5f4-ceea33c1740a", APIVersion:"networking.k8s.io/v1", ResourceVersion:"87452", FieldPath:""}): type: 'Normal' reason: 'Sync' Scheduled for sync
+I0331 06:11:21.026887       7 main.go:219] Current config.corsAllowOrigin [http://localhost:8080]
+I0331 06:11:21.032708       7 controller.go:196] "Configuration changes detected, backend reload required"
+I0331 06:11:21.392133       7 controller.go:216] "Backend successfully reloaded"
+I0331 06:11:21.393158       7 event.go:377] Event(v1.ObjectReference{Kind:"Pod", Namespace:"ingress-nginx", Name:"ingress-nginx-controller-598945c5d4-4sbdx", UID:"f5920688-a584-415c-acda-ea6316ae2e2c", APIVersion:"v1", ResourceVersion:"83705", FieldPath:""}): type: 'Normal' reason: 'RELOAD' NGINX reload triggered due to a change in configuration
+I0331 06:11:51.918511       7 status.go:304] "updating Ingress status" namespace="default" ingress="banking-auth-docs-ingress" currentValue=null newValue=[{"hostname":"localhost"}]
+I0331 06:11:51.927603       7 event.go:377] Event(v1.ObjectReference{Kind:"Ingress", Namespace:"default", Name:"banking-auth-docs-ingress", UID:"abc1b980-6c4b-44e4-b5f4-ceea33c1740a", APIVersion:"networking.k8s.io/v1", ResourceVersion:"87515", FieldPath:""}): type: 'Normal' reason: 'Sync' Scheduled for sync
+I0331 06:11:51.928064       7 main.go:219] Current config.corsAllowOrigin [http://localhost:8080]
+I0331 06:14:15.147364       7 event.go:377] Event(v1.ObjectReference{Kind:"Ingress", Namespace:"default", Name:"banking-account-docs-ingress", UID:"f1036139-d1d1-4189-b442-de8c0eccfdd5", APIVersion:"networking.k8s.io/v1", ResourceVersion:"87796", FieldPath:""}): type: 'Normal' reason: 'Sync' Scheduled for sync
+I0331 06:14:15.147953       7 main.go:219] Current config.corsAllowOrigin [http://localhost:8080]
+I0331 06:14:15.149006       7 controller.go:196] "Configuration changes detected, backend reload required"
+I0331 06:14:15.279918       7 controller.go:216] "Backend successfully reloaded"
+I0331 06:14:15.280291       7 event.go:377] Event(v1.ObjectReference{Kind:"Pod", Namespace:"ingress-nginx", Name:"ingress-nginx-controller-598945c5d4-4sbdx", UID:"f5920688-a584-415c-acda-ea6316ae2e2c", APIVersion:"v1", ResourceVersion:"83705", FieldPath:""}): type: 'Normal' reason: 'RELOAD' NGINX reload triggered due to a change in configuration

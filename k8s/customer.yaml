@@ -65,7 +65,8 @@ spec:
     - protocol: TCP
       port: 3002
       targetPort: 3002
-  type: ClusterIP
+      nodePort: 30002
+  type: NodePort
 
 ---
 # 3a. Ingress for Swagger Docs (Public + CORS enabled for UI on 8080)
@@ -84,14 +85,14 @@ spec:
     - http:
         paths:
           # Explicit routing to ensure docs-json also bypasses Auth Guard
-          - path: /customer/api/docs
+          - path: /public/customer/api/docs
             pathType: Prefix
             backend:
               service:
                 name: banking-customer
                 port:
                   number: 3002
-          - path: /customer/api/docs-json
+          - path: /public/customer/api/docs-json
             pathType: Prefix
             backend:
               service:
@@ -106,7 +107,7 @@ kind: Ingress
 metadata:
   name: banking-customer-ingress
   annotations:
-    nginx.ingress.kubernetes.io/auth-url: "http://banking-auth:3000/auth/validate"
+    nginx.ingress.kubernetes.io/auth-url: "http://banking-auth:3000/auth/validate?uri=$request_uri"
     nginx.ingress.kubernetes.io/auth-response-headers: "X-User-ID"
     # Added CORS here too so your frontend can talk to it later
     nginx.ingress.kubernetes.io/enable-cors: "true"
@@ -144,7 +145,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /customer/health
+          - path: /public/customer/health
             pathType: Exact
             backend:
               service:

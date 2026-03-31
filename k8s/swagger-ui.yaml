@@ -18,9 +18,9 @@ spec:
         ports:
         - containerPort: 8080
         env:
-        # Notice we are using absolute URLs pointing to your Nginx Gateway!
+        # Directly hitting each service's NodePort — bypasses Nginx auth entirely
         - name: URLS
-          value: "[{ url: 'http://localhost/auth/api/docs-json', name: 'Auth API' }, { url: 'http://localhost/account/api/docs-json', name: 'Account API' }, { url: 'http://localhost/customer/api/docs-json', name: 'Customer API' }]"
+          value: "[{ url: 'http://localhost:30000/public/auth/api/docs-json', name: 'Auth API' }, { url: 'http://localhost:30001/public/account/api/docs-json', name: 'Account API' }, { url: 'http://localhost:30002/public/customer/api/docs-json', name: 'Customer API' }]"
 ---
 apiVersion: v1
 kind: Service

@@ -141,6 +141,15 @@ export class AuthController {
     @Req() req: express.Request,
     @Res() res: express.Response,
   ) {
+    // ── Public path bypass ──────────────────────────────────────────────────
+    // The auth-url annotation appends ?uri=$request_uri so we get the original
+    // URI as a query param. Any path under /public/ is freely accessible.
+    const originalUri = (req.query['uri'] as string) || (req.headers['x-original-uri'] as string);
+    if (originalUri && originalUri.startsWith('/public/')) {
+      return res.status(200).send();
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
     const sessionId = req.cookies['banking_session'];
 
     if (!sessionId) {
