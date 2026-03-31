@@ -88,8 +88,15 @@ spec:
   rules:
     - http:
         paths:
-          # Longest match routing: Catches /account/api/docs AND /account/api/docs-json
+          # Explicit routing to ensure docs-json also bypasses Auth Guard
           - path: /account/api/docs
+            pathType: Prefix
+            backend:
+              service:
+                name: banking-account
+                port:
+                  number: 3001
+          - path: /account/api/docs-json
             pathType: Prefix
             backend:
               service:
