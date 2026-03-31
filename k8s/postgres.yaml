@@ -49,7 +49,10 @@ spec:
             - name: POSTGRES_USER
               value: postgres
             - name: POSTGRES_PASSWORD
-              value: admin
+              valueFrom:
+                secretKeyRef:
+                  name: banking-db-secrets
+                  key: postgres-password
             - name: POSTGRES_DB
               value: postgres
           volumeMounts:
@@ -57,12 +60,24 @@ spec:
               mountPath: /var/lib/postgresql/data
             - name: init-script
               mountPath: /docker-entrypoint-initdb.d
-          # Translating your Docker Compose Healthcheck
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
           readinessProbe:
             exec:
               command: ['pg_isready', '-U', 'postgres', '-d', 'postgres']
             initialDelaySeconds: 5
             periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ['pg_isready', '-U', 'postgres', '-d', 'postgres']
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
       volumes:
         - name: postgres-data
           persistentVolumeClaim:

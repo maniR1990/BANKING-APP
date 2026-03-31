@@ -18,25 +18,41 @@ spec:
           imagePullPolicy: Never
           ports:
             - containerPort: 3002
+          envFrom:
+            - configMapRef:
+                name: banking-shared-config
           env:
+            - name: NODE_ENV
+              value: "development"
             - name: PORT
               value: '3002'
-            - name: DB_HOST
-              value: 'banking-postgres'
-            - name: DB_PORT
-              value: '5432'
-            - name: DB_USERNAME
-              value: 'postgres'
             - name: DB_PASSWORD
-              value: 'admin'
+              valueFrom:
+                secretKeyRef:
+                  name: banking-db-secrets
+                  key: postgres-password
             - name: DB_NAME
               value: 'banking_customer'
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
           readinessProbe:
             httpGet:
               path: /api/health
               port: 3002
             initialDelaySeconds: 15
             periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3002
+            initialDelaySeconds: 25
+            periodSeconds: 15
+            failureThreshold: 3
 ---
 apiVersion: v1
 kind: Service
@@ -50,3 +66,81 @@ spec:
       port: 3002
       targetPort: 3002
   type: ClusterIP
+
+---
+# 3a. Ingress for Swagger Docs (Public + CORS enabled for UI on 8080)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: banking-customer-docs-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:8080"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS, DELETE, PATCH"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          # Longest match routing: Catches /customer/api/docs AND /customer/api/docs-json
+          - path: /customer/api/docs
+            pathType: Prefix
+            backend:
+              service:
+                name: banking-customer
+                port:
+                  number: 3002
+
+---
+# 3b. Ingress Routing Entrypoint (Protected by Auth Guard)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: banking-customer-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/auth-url: "http://banking-auth:3000/auth/validate"
+    nginx.ingress.kubernetes.io/auth-response-headers: "X-User-ID"
+    # Added CORS here too so your frontend can talk to it later
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:8080"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS, DELETE, PATCH"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          # Catches all other traffic to /customer
+          - path: /customer
+            pathType: Prefix
+            backend:
+              service:
+                name: banking-customer
+                port:
+                  number: 3002
+
+---
+# 3c. Health Check Ingress (Public - No Auth Guard)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: banking-customer-health-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /api/health
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:8080"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Accept, Content-Type"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /customer/health
+            pathType: Exact
+            backend:
+              service:
+                name: banking-customer
+                port:
+                  number: 3002

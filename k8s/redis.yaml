@@ -18,12 +18,24 @@ spec:
           image: redis:7-alpine
           ports:
             - containerPort: 6379
-          # Translating your Docker Compose Healthcheck
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
           readinessProbe:
             exec:
               command: ['redis-cli', 'ping']
             initialDelaySeconds: 5
             periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ['redis-cli', 'ping']
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
 
 ---
 # 2. Service to expose Redis internally

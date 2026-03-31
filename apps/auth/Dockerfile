@@ -23,7 +23,6 @@ RUN pnpm exec nx build auth --prod --no-cloud
 # Stage 4: Production Runtime
 FROM node:20-alpine AS runner
 WORKDIR /app
-ENV NODE_ENV=production
 RUN apk add --no-cache curl
 
 COPY --from=builder /app/dist/apps/auth ./dist

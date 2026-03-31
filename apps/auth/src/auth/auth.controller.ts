@@ -24,7 +24,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly redisService: RedisService,
-  ) {}
+  ) { }
 
   @Post('login')
   @ApiOperation({ summary: 'Log in to the application' })
@@ -48,7 +48,7 @@ export class AuthController {
 
     res.cookie('banking_session', sessionId, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 3600000, // 1 hour
     });
@@ -159,7 +159,7 @@ export class AuthController {
     // Refresh cookie expiration
     res.cookie('banking_session', sessionId, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 3600000, // 1 hour
     });

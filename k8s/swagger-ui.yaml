@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: swagger-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: swagger-ui
+  template:
+    metadata:
+      labels:
+        app: swagger-ui
+    spec:
+      containers:
+      - name: swagger-ui
+        image: swaggerapi/swagger-ui:latest
+        ports:
+        - containerPort: 8080
+        env:
+        # Notice we are using absolute URLs pointing to your Nginx Gateway!
+        - name: URLS
+          value: "[{ url: 'http://localhost/auth/api/docs-json', name: 'Auth API' }, { url: 'http://localhost/account/api/docs-json', name: 'Account API' }, { url: 'http://localhost/customer/api/docs-json', name: 'Customer API' }]"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: swagger-ui
+spec:
+  # THIS IS THE MAGIC: Bypasses Ingress and binds directly to localhost:8080
+  type: LoadBalancer 
+  selector:
+    app: swagger-ui
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

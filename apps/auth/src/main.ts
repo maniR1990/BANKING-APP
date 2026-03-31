@@ -12,6 +12,17 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  // 1. Determine the allowed origins based on the environment
+  const allowedOrigins = process.env.NODE_ENV === 'production'
+    ? [process.env.CORS_ORIGIN || 'https://your-production-domain.com']
+    : ['http://localhost:8080', 'http://localhost']; // Allows local Swagger and local Frontend
+
+  // 2. Apply the dynamic rules
+  app.enableCors({
+    origin: allowedOrigins,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
 
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
@@ -22,7 +33,7 @@ async function bootstrap() {
       .build();
 
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document);
+    SwaggerModule.setup('auth/api/docs', app, document);
   }
 
   // Use the shared Pino logger

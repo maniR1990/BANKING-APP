@@ -22,7 +22,6 @@ RUN pnpm exec nx build customer --prod --no-cloud
 # Stage 4: Production Runtime
 FROM node:20-alpine AS runner
 WORKDIR /app
-ENV NODE_ENV=production
 
 # --- PRINCIPAL TIP: Install curl for health checks ---
 RUN apk add --no-cache curl

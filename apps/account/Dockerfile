@@ -19,7 +19,6 @@ RUN NX_DAEMON=false pnpm exec nx build account --prod --no-cloud
 # Stage 4: Production Runtime
 FROM node:20-alpine AS runner
 WORKDIR /app
-ENV NODE_ENV=production
 
 # --- FIX 1: Install curl so the health check works ---
 RUN apk add --no-cache curl

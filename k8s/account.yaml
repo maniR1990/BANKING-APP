@@ -18,27 +18,46 @@ spec:
           imagePullPolicy: Never
           ports:
             - containerPort: 3001
+          envFrom:
+            - configMapRef:
+                name: banking-shared-config
           env:
+            - name: NODE_ENV
+              value: "development"
             - name: PORT
               value: '3001'
             - name: DATABASE_URL
-              value: 'postgresql://postgres:admin@banking-postgres:5432/banking_account'
-            - name: DB_HOST
-              value: 'banking-postgres'
-            - name: DB_PORT
-              value: '5432'
-            - name: DB_USERNAME
-              value: 'postgres'
+              valueFrom:
+                secretKeyRef:
+                  name: banking-db-secrets
+                  key: account-db-url
             - name: DB_PASSWORD
-              value: 'admin'
+              valueFrom:
+                secretKeyRef:
+                  name: banking-db-secrets
+                  key: postgres-password
             - name: DB_NAME
               value: 'banking_account'
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
           readinessProbe:
             httpGet:
               path: /api/health
               port: 3001
             initialDelaySeconds: 15
             periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3001
+            initialDelaySeconds: 25
+            periodSeconds: 15
+            failureThreshold: 3
 ---
 apiVersion: v1
 kind: Service
@@ -52,3 +71,81 @@ spec:
       port: 3001
       targetPort: 3001
   type: ClusterIP
+
+---
+# 3a. Ingress for Swagger Docs (Public + CORS enabled for UI on 8080)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: banking-account-docs-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:8080"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS, DELETE, PATCH"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          # Longest match routing: Catches /account/api/docs AND /account/api/docs-json
+          - path: /account/api/docs
+            pathType: Prefix
+            backend:
+              service:
+                name: banking-account
+                port:
+                  number: 3001
+
+---
+# 3b. Ingress Routing Entrypoint (Protected by Auth Guard)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: banking-account-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/auth-url: "http://banking-auth:3000/auth/validate"
+    nginx.ingress.kubernetes.io/auth-response-headers: "X-User-ID"
+    # Added CORS here too so your frontend can talk to it later
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:8080"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS, DELETE, PATCH"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          # Catches all other traffic to /account
+          - path: /account
+            pathType: Prefix
+            backend:
+              service:
+                name: banking-account
+                port:
+                  number: 3001
+
+---
+# 3c. Health Check Ingress (Public - No Auth Guard)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: banking-account-health-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /api/health
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:8080"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Accept, Content-Type"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /account/health
+            pathType: Exact
+            backend:
+              service:
+                name: banking-account
+                port:
+                  number: 3001

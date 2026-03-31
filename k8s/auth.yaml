@@ -18,28 +18,43 @@ spec:
           imagePullPolicy: Never # Forces K8s to use your local Docker image
           ports:
             - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: banking-shared-config
           env:
+            - name: NODE_ENV
+              value: "development"
             - name: PORT
               value: '3000'
             - name: REDIS_HOST
               value: 'banking-redis'
-            - name: DB_HOST
-              value: 'banking-postgres'
-            - name: DB_PORT
-              value: '5432'
-            - name: DB_USERNAME
-              value: 'postgres'
             - name: DB_PASSWORD
-              value: 'admin'
+              valueFrom:
+                secretKeyRef:
+                  name: banking-db-secrets
+                  key: postgres-password
             - name: DB_NAME
               value: 'banking_auth'
-          # Translating your Docker Compose curl healthcheck to a native K8s HTTP probe
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
           readinessProbe:
             httpGet:
               path: /health
               port: 3000
             initialDelaySeconds: 10
             periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            failureThreshold: 3
 ---
 apiVersion: v1
 kind: Service
@@ -53,3 +68,53 @@ spec:
       port: 3000
       targetPort: 3000
   type: ClusterIP
+
+---
+# 3. Ingress Routing Entrypoint
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: banking-auth-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/limit-rps: "5"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:8080"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-User-ID"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: banking-auth
+                port:
+                  number: 3000
+
+---
+# 4. Health Check Ingress (Public - No Auth Guard)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: banking-auth-health-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /health
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:8080"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Accept, Content-Type"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /auth/health
+            pathType: Exact
+            backend:
+              service:
+                name: banking-auth
+                port:
+                  number: 3000
