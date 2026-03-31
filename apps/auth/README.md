@@ -6,7 +6,7 @@ This directory contains the `auth` microservice for the banking application. It 
 
 1.  **Cookie `maxAge` Fix:** The `maxAge` for the `banking_session` cookie is now aligned with the Redis session Time-To-Live (TTL) of 1 hour (3,600,000 milliseconds).
 2.  **Session Rolling (Refresh Mechanism):** Implemented session rolling in the `validateToken` endpoint. Each successful validation request refreshes the expiration time of the session in Redis and resets the cookie expiration, keeping active users logged in.
-3.  **Rate Limiting:** Implemented at the API Gateway (Nginx) level to protect the `/auth/login` and `/auth/register` endpoints from brute-force and credential stuffing attacks. (Configured outside this service codebase).
+3.  **Rate Limiting:** Implemented at the API Gateway (Kubernetes Nginx Ingress) level via annotations to protect the `/auth/login` and `/auth/register` endpoints from brute-force and credential stuffing attacks. (Configured in the `k8s/` manifests).
 4.  **Password Strength Validation:** Added a regular expression to the `RegisterDto` to enforce strong password policies (requires uppercase, lowercase, number, and a special character).
 5.  **Session Invalidation:** Implemented a `change-password` endpoint that securely handles password updates by proactively invalidating *all* active Redis sessions tied to the user's ID, forcing a re-login across all devices.
 
@@ -21,7 +21,7 @@ This service uses **Session-based Authentication via HTTP Cookies backed by Redi
 ```mermaid
 sequenceDiagram
     participant User as Client/Browser
-    participant Gateway as Nginx (API Gateway)
+    participant Gateway as K8s Ingress (API Gateway)
     participant Auth as Auth Service
     participant Redis as Redis (Session Store)
     participant DB as Postgres (Database)

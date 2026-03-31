@@ -22,8 +22,8 @@ Here is the current status of each item in the codebase:
 *   **CI-CD Diagram:** Included in `ARCHITECTURE.md`.
 *   **Postman Collection of APIs:** Provided in `Banking_App_API_Collection.postman_collection.json`.
 *   **Source Code & Docker Containerisation:** Present. All microservices (Auth, Account, Customer) are containerised using Docker.
-*   **Service Discovery:** Present. Natively implemented via Kubernetes Services (e.g., `ClusterIP` routing via internal DNS, where `http://banking-auth:3000` resolves to the `banking-auth` service pods).
-*   **API Gateway:** Present. Implemented using Kubernetes Ingress Controller (`ingressClassName: nginx`), routing requests directly to the microservice cluster services.
+*   **Service Discovery:** Present. Natively implemented via Kubernetes Services (e.g., `ClusterIP` routing via internal DNS in the `k8s/` manifests, where `http://auth-service:3000` resolves to the `auth-service` pods).
+*   **API Gateway:** Present. Implemented using Kubernetes Ingress Controller (`ingressClassName: nginx`), routing requests directly to the microservice cluster services as defined in `k8s/` manifests.
 *   **Communication pattern - Synchronous:** Present. Communication between the Ingress Gateway, downstream microservices, and databases is synchronous via HTTP/REST.
 
 ### Missing or Incomplete Deliverables:

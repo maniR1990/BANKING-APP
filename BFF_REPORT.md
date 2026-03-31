@@ -10,9 +10,9 @@ This document outlines the current state of the Backend for Frontend (BFF) patte
 
 ### Current State Analysis:
 - The system currently utilizes a **Direct-to-Microservice via API Gateway** pattern.
-- A single, generic NGINX API Gateway handles all external routing (`nginx.conf`).
+- A single Kubernetes NGINX Ingress Controller acts as the API Gateway, handling all external routing.
 - The frontend client directly queries the microservices through this single gateway based on path routing (e.g., `/auth/*`, `/customer/*`, `/account/*`).
-- NGINX serves as an aggregation point for routing and internal authentication validation (`/internal-auth-validate`), but it does not aggregate data, shape payloads, or provide dedicated APIs tailored for specific client platforms.
+- The K8s Ingress serves as an aggregation point for routing and external authentication validation (`nginx.ingress.kubernetes.io/auth-url`), but it does not aggregate data, shape payloads, or provide dedicated APIs tailored for specific client platforms.
 - The microservices (Auth, Customer, Account) expose generic REST and GraphQL APIs that serve all potential clients identically.
 
 ---
