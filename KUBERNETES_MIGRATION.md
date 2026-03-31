@@ -1,8 +1,8 @@
 # Migrating to Kubernetes (Service Discovery & API Gateway)
 
-This guide provides step-by-step instructions on migrating your current Docker Compose microservices architecture to Kubernetes. Specifically, it addresses how Kubernetes natively handles **Service Discovery** and **API Gateways**.
+This guide provides step-by-step instructions on the Kubernetes migration. **Note: The repository has already been updated to use these Kubernetes manifests (`k8s/` directory) instead of Docker Compose for its core infrastructure.** Specifically, it addresses how Kubernetes natively handles **Service Discovery** and **API Gateways**.
 
-As requested, this guide uses **Docker Desktop Kubernetes** for local testing and includes the actual YAML code you need to get started.
+As requested, this guide uses **Docker Desktop Kubernetes** for local testing and explains the YAML code present in the `k8s/` directory.
 
 ---
 

@@ -148,14 +148,14 @@ Once fully implemented, your workflow for debugging an issue will be:
 
 ---
 
-## Implementation TODO List
+## Implementation TODO List (Status: Not Started / Missing)
 
-Use this checklist to monitor the implementation progress:
+Use this checklist to monitor the implementation progress. **Note: Currently, none of the following components are implemented in the codebase.** The `monitoring/` directory does not exist, and the `libs/observability` library is not created.
 
 - [ ] **Phase 1: Shared Library**
   - [ ] Generate `libs/observability` Nx library.
   - [ ] Implement `tracing.ts` (OpenTelemetry Node SDK).
-  - [ ] Implement `logger.config.ts` (nestjs-pino configured for JSON).
+  - [ ] Implement `logger.config.ts` (nestjs-pino configured for JSON) - *Note: Pino logging exists in `libs/common`, but the OTel integration is incomplete.*
   - [ ] Implement Prometheus module wrapper.
   - [ ] Inject OTel `trace_id` into Pino formatting.
 

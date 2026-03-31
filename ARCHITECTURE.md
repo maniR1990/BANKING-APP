@@ -6,27 +6,27 @@ This document details the architectural analysis of the current NestJS Monorepo 
 
 ## 1. High Level Design Document
 
-The current architecture is a classic Microservices pattern using API Gateway routing and synchronous communication, orchestrated via Docker Compose.
+The current architecture is a classic Microservices pattern using API Gateway routing and synchronous communication. The environment is actively orchestrating services via Kubernetes using manifests found in the `k8s/` directory.
 
 ### Current Architecture
 
 ```mermaid
 graph TD
-    Client([Client / Frontend]) --> Nginx[NGINX API Gateway :80]
+    Client([Client / Frontend]) --> Ingress[Kubernetes Nginx Ingress :80]
 
-    subgraph "Docker Bridge Network"
-        Nginx -->|"/auth/*"| Auth[Auth Service :3000]
-        Nginx -->|"/customer/*"| Customer[Customer Service :3000]
-        Nginx -->|"/account/*"| Account[Account Service :3001]
+    subgraph "Kubernetes Cluster"
+        Ingress -->|"/auth/*"| Auth[Auth Service :3000]
+        Ingress -->|"/customer/*"| Customer[Customer Service :3002]
+        Ingress -->|"/account/*"| Account[Account Service :3001]
 
         %% Internal Auth Check
-        Nginx -..->|"/internal-auth-validate"| Auth
+        Ingress -..->|"/auth/validate"| Auth
 
         %% Databases
         Auth --> Redis[(Redis - Session Store)]
-        Auth --> PostgresDB[(Postgres - banking_auth)]
-        Customer --> PostgresDB2[(Postgres - banking_customer)]
-        Account --> PostgresDB3[(Postgres - banking_account)]
+        Auth --> PostgresDB[(Postgres - db)]
+        Customer --> PostgresDB
+        Account --> PostgresDB
     end
 ```
 
@@ -107,35 +107,29 @@ The project leverages an Nx Monorepo structure containing all source code inside
 - `apps/customer/`: GraphQL-based microservice for customer management.
 - `apps/account/`: REST-based account service.
 
-### Containerisation with Docker
-- **Present:** **Yes**. Docker is successfully implemented.
-- **Details:** Each service has its own `Dockerfile` located at `apps/<service>/Dockerfile`. A root `docker-compose.yml` orchestrates all services (Auth, Customer, Account), the PostgreSQL database, Redis, and the NGINX API Gateway. They share a `banking_network`.
+### Containerisation with Docker & Kubernetes
+- **Present:** **Yes**. Docker and Kubernetes are successfully implemented.
+- **Details:** Each service has its own `Dockerfile` located at `apps/<service>/Dockerfile`. The infrastructure is orchestrated using Kubernetes manifests found in the `k8s/` directory rather than relying on Docker Compose.
 
 ### Service Discovery
-- **Present:** **Partial (Docker DNS only)**.
-- **Missing Explicitly:** A dedicated Service Discovery registry like **Consul**, **Eureka**, or **Kubernetes CoreDNS** for dynamic scaling.
-- **Details:** Currently, NGINX hardcodes upstream hostnames (e.g., `http://banking_auth:3000`). This works for basic Docker Compose setups via Docker's internal DNS but fails if services scale dynamically across multiple server nodes.
-- **How to implement:**
-  1. Add a Consul or Eureka container to `docker-compose.yml`.
-  2. Install a NestJS integration package (e.g., `@nestjs/microservices` with a custom strategy or third-party Consul modules).
-  3. Modify the `main.ts` of each app to register itself with the discovery service upon startup.
-  4. Modify the API Gateway to query the discovery service for IP addresses before routing requests.
+- **Present:** **Yes**.
+- **Details:** Provided natively via Kubernetes CoreDNS and Service manifests (e.g., `postgres-service`, `auth-service`). Microservices interact using these internal DNS hostnames across the cluster.
 
 ### API Gateway
 - **Present:** **Yes**.
-- **Details:** Provided by NGINX (`nginx.conf` mounted via Docker). It successfully handles rate-limiting (`limit_req_zone`), path-based routing (`/auth/`, `/customer/`, `/account/`), and **Internal Authentication Validation** (acting as a guard for downstream protected services).
-- **How to enhance:** While NGINX is a valid gateway, for enterprise NestJS ecosystems, you might replace NGINX with **Kong**, **Apache APISIX**, or a dedicated NestJS-based Gateway using `@nestjs/gateway` or GraphQL Federation for deeper protocol support.
+- **Details:** Handled by a Kubernetes NGINX Ingress Controller. It manages rate-limiting, path-based routing (`/auth/`, `/customer/`, `/account/`), and **Internal Authentication Validation** via standard Ingress annotations (acting as an external auth guard).
+- **How to enhance:** While NGINX Ingress is a standard choice, for a robust enterprise solution you could upgrade to Kong Ingress or an API Gateway using Apisix for finer traffic control and observability plugins.
 
 ### Communication Pattern: Synchronous vs Asynchronous
 - **Synchronous Communication:**
   - **Present:** **Yes**.
-  - **Details:** Achieved via HTTP REST. NGINX calls microservices synchronously. NGINX also synchronously calls the Auth service via `auth_request /internal-auth-validate` before allowing traffic to Account/Customer services.
+  - **Details:** Achieved via HTTP REST. The API Gateway routes to downstream microservices synchronously, acting as the primary medium of communication.
 - **Asynchronous Communication:**
   - **Present:** **No**.
   - **Missing Explicitly:** There is no Message Broker or Event Bus implemented for fire-and-forget or pub/sub communication between the microservices.
   - **Details:** If the Auth service wants to tell the Customer service a new user was created, it currently cannot do so without blocking the request.
   - **How to implement:**
-    1. Add **RabbitMQ** or **Apache Kafka** to `docker-compose.yml`.
+    1. Add **RabbitMQ** or **Apache Kafka** manifests into the `k8s/` directory.
     2. Import `@nestjs/microservices` into your applications.
     3. Configure `ClientsModule.register()` in `app.module.ts` using the `Transport.RMQ` or `Transport.KAFKA` strategy.
     4. Emit events like `this.client.emit('user_created', payload)`.
@@ -151,9 +145,9 @@ The project leverages an Nx Monorepo structure containing all source code inside
 | **CI/CD Diagram** | ✅ Provided | Review diagrams in this file. Setup `.github/workflows`. |
 | **Postman Collection** | ✅ Provided | Import the generated JSON file into Postman. |
 | **Source Code structure** | ✅ Exists | Keep using Nx structure. |
-| **Docker Containerisation** | ✅ Exists | No action required. Setup works well. |
-| **API Gateway** | ✅ Exists | Consider upgrading to Kong/Apisix if API management features (metrics, deep auth) are needed. |
-| **Service Discovery** | ❌ Missing | Implement Consul/Eureka or rely on Kubernetes if deploying to a cluster. Update NestJS startup scripts. |
-| **Asynchronous Comm.** | ❌ Missing | Add RabbitMQ/Kafka to docker-compose. Use `@nestjs/microservices` to emit and consume events. |
+| **Docker Containerisation** | ✅ Exists | Continue using Docker and K8s manifests in `k8s/`. |
+| **API Gateway** | ✅ Exists | Evaluate Kong or Apisix for extended functionalities beyond the Nginx Ingress. |
+| **Service Discovery** | ✅ Exists | Already functioning via Kubernetes Services. |
+| **Asynchronous Comm.** | ❌ Missing | Add RabbitMQ/Kafka manifests to `k8s/` and utilize `@nestjs/microservices` for inter-service events. |
 
 By addressing the missing Service Discovery and Asynchronous Message Broker components, the system will fully meet robust enterprise microservice architecture standards.

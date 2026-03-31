@@ -79,8 +79,9 @@ This workspace contains three independent NestJS microservices managed inside an
    - PostgreSQL accessed through TypeORM (`*.entity.ts` definitions).
    - Each service may define its own entities.
 
-4. **Infrastructure**
-   - Dockerfiles in each app and a root `docker-compose.yml` orchestrating databases (Postgres, Redis) and services.
+4. **Infrastructure (Kubernetes)**
+   - Dockerfiles in each app.
+   - Core infrastructure (Databases, API Gateway/Ingress, Microservices) is orchestrated using Kubernetes manifests located in the `k8s/` directory. (Docker Compose setup has been deprecated).
    - Health checks using `@nestjs/terminus` (see `auth/src/health/health.controller.ts`).
 
 5. **Testing & Quality**
@@ -110,13 +111,19 @@ Dev dependencies include Nx plugins, TypeScript tooling, Jest, ESLint, Prettier,
    pnpm install
    ```
 
-2. **Dockerized environment**:
+2. **Kubernetes environment (Docker Desktop):**
+   Ensure Docker Desktop Kubernetes is enabled. First build the images, then apply the manifests:
    ```bash
-   pnpm run docker:build   # build and start all containers
-   pnpm run docker:up      # start without rebuilding
-   pnpm run docker:down    # stop and remove volumes
+   # Build the microservices locally
+   pnpm nx run-many -t build
+   docker build -t banking-auth:latest -f apps/auth/Dockerfile .
+   docker build -t banking-customer:latest -f apps/customer/Dockerfile .
+   docker build -t banking-account:latest -f apps/account/Dockerfile .
+
+   # Apply manifests (Make sure Nginx Ingress is enabled on your cluster)
+   kubectl apply -f k8s/
    ```
-   Services expose ports configured in `docker-compose.yml` (3000–3002).
+   Services are exposed via the Kubernetes Nginx Ingress on `localhost:80`.
 
 3. **Local development**:
    ```bash
