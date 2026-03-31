@@ -9,22 +9,31 @@ This section tracks the progress of the cross-cutting concerns outlined in this 
 
 ### ✅ Fully Implemented
 - **Structured Logging:** Centralized `AppLoggerModule` using `nestjs-pino` is fully implemented in the `libs/common` shared library and applied across the `auth`, `account`, and `customer` microservices.
-- **Context Propagation & Distributed Tracing:** OpenTelemetry (`@opentelemetry/api`) is integrated into the logging configuration to inject `traceId` context.
 - **Global Error Boundaries:** A robust `GlobalExceptionFilter` mapping HTTP/REST and GraphQL exceptions to RFC 7807 (`ProblemDetails`) is implemented in `libs/common` and applied globally in all bootstrapped apps.
 - **Data Validation (Security):** `class-validator` and `ValidationPipe` are strictly enforced across all controllers via global pipes (stripping extra fields).
-- **Basic Perimeter Defense:** Nginx API Gateway is set up with basic Rate Limiting (`limit_req_zone`) for authentication endpoints. Gateway validates sessions via the auth service before forwarding requests (`auth_request` pattern).
+- **Basic Perimeter Defense:** Kubernetes Ingress acts as the API Gateway, handling routing for authentication endpoints and applying external authentication logic via annotations (`nginx.ingress.kubernetes.io/auth-url`).
 
 ### 🚧 Partially Implemented / In Progress
+<<<<<<< HEAD:docs/CROSS_CUTTING_CONCERNS.md
 - **Scalability & Orchestration:** Successfully migrated to Kubernetes (Docker Desktop). Native K8s manifests for Deployments, Services, ConfigMaps, and Secrets are implemented and active.
 - **Identity and Access Management (IAM):** Trust is successfully shifted to the Nginx gateway, which forwards `X-User-ID`. However, sessions still use stateful HTTP-only cookies backed by Redis, rather than the proposed stateless JWT/OAuth2 flows.
+=======
+- **Context Propagation & Distributed Tracing:** OpenTelemetry (`@opentelemetry/api`) is imported into the logging configuration to conditionally inject `traceId` context, but the overarching OTel Collector logic is missing.
+- **Scalability & Orchestration:** A `k8s/` directory now holds Kubernetes manifests (Deployments, Services, and an Ingress) reflecting migration away from `docker-compose.yml`, but Helm charts, Horizontal Pod Autoscaling (HPA), and Service Mesh aren't in place.
+- **Identity and Access Management (IAM):** Trust is shifted to the Kubernetes Ingress which forwards `X-User-ID`. However, sessions still use stateful HTTP-only cookies backed by Redis in the Auth Service.
+>>>>>>> d6eb1133dab18a778825fff39c48ebb295c382c9:CROSS_CUTTING_CONCERNS.md
 
 ### ❌ Remaining / Not Started
 - **Application-Level Defense (Security Headers):** The `helmet` middleware, which sets secure HTTP headers (e.g., CSP, HSTS, X-Frame-Options), is not yet installed or injected into the NestJS applications.
-- **Application-Level Rate Limiting:** While Nginx provides perimeter throttling, `@nestjs/throttler` is not yet configured for internal service-level rate limiting or complex bursting.
+- **Application-Level Rate Limiting:** While the K8s Ingress provides perimeter throttling (via `limit-rps` annotations), `@nestjs/throttler` is not yet configured for internal service-level rate limiting or complex bursting.
 - **Service-to-Service Security (mTLS):** Internal traffic between microservices is not cryptographically authenticated via a Service Mesh (e.g., Istio/Linkerd).
 - **Caching & Database Replicas:** Distributed in-memory caching (e.g., Redis for generic resolver outputs/REST payloads) and database read replicas with connection pooling (PgBouncer) remain theoretical.
+<<<<<<< HEAD:docs/CROSS_CUTTING_CONCERNS.md
 - **Asynchronous Messaging:** Implemented via RabbitMQ. Auth service publishes `UserCreatedEvent`, consumed by Account and Customer services for decoupled processing.
 - **Advanced Observability Stack:** The underlying applications are instrumented to emit telemetry, but the self-hosted APM platforms (LGTM Stack) or SaaS targets are not actively receiving or visualizing the data in standard environment deployment.
+=======
+- **Advanced Observability Stack:** The full self-hosted APM platforms (LGTM Stack) are not actively deployed, and the `libs/observability` and `monitoring/` directories have not been created.
+>>>>>>> d6eb1133dab18a778825fff39c48ebb295c382c9:CROSS_CUTTING_CONCERNS.md
 
 ---
 
