@@ -1,3 +1,78 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: global-health-payload
+data:
+  health.json: |
+    {"status": "gateway-up"}
+  default.conf: |
+    server {
+      listen 80;
+      
+      # Handle CORS preflight explicitly if needed, but the Ingress annotations usually handle it
+      location /health {
+        default_type application/json;
+        alias /usr/share/nginx/html/health.json;
+      }
+      
+      location / {
+        return 200 'OK';
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: global-health
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: global-health
+  template:
+    metadata:
+      labels:
+        app: global-health
+    spec:
+      containers:
+        - name: dummy-backend
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: payload-volume
+              mountPath: /usr/share/nginx/html/health.json
+              subPath: health.json
+            - name: config-volume
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "16Mi"
+            limits:
+              cpu: "50m"
+              memory: "32Mi"
+      volumes:
+        - name: payload-volume
+          configMap:
+            name: global-health-payload
+        - name: config-volume
+          configMap:
+            name: global-health-payload
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: global-health
+spec:
+  selector:
+    app: global-health
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -8,12 +83,6 @@ metadata:
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "Accept, Content-Type, Authorization"
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      if ($request_method = 'OPTIONS') {
-          return 204;
-      }
-      default_type application/json;
-      return 200 '{"status": "gateway-up"}';
 spec:
   ingressClassName: nginx
   rules:
@@ -23,6 +92,6 @@ spec:
             pathType: Exact
             backend:
               service:
-                name: banking-auth
+                name: global-health
                 port:
-                  number: 3000
+                  number: 80
