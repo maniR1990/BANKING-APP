@@ -2,6 +2,29 @@
 
 This document provides a Principal Architect's perspective on addressing cross-cutting concerns within the current NestJS/Nx monorepo ecosystem. It outlines the strategy, recommended modern tooling, and high-level architectural decisions required for a robust, enterprise-grade system.
 
+
+## Current Implementation Status (Updated)
+
+This section tracks the progress of the cross-cutting concerns outlined in this document against the current repository state.
+
+### ✅ Fully Implemented
+- **Structured Logging:** Centralized `AppLoggerModule` using `nestjs-pino` is fully implemented in the `libs/common` shared library and applied across the `auth`, `account`, and `customer` microservices.
+- **Context Propagation & Distributed Tracing:** OpenTelemetry (`@opentelemetry/api`) is integrated into the logging configuration to inject `traceId` context.
+- **Global Error Boundaries:** A robust `GlobalExceptionFilter` mapping HTTP/REST and GraphQL exceptions to RFC 7807 (`ProblemDetails`) is implemented in `libs/common` and applied globally in all bootstrapped apps.
+- **Data Validation (Security):** `class-validator` and `ValidationPipe` are strictly enforced across all controllers via global pipes (stripping extra fields).
+- **Basic Perimeter Defense:** Nginx API Gateway is set up with basic Rate Limiting (`limit_req_zone`) for authentication endpoints. Gateway validates sessions via the auth service before forwarding requests (`auth_request` pattern).
+
+### 🚧 Partially Implemented / In Progress
+- **Scalability & Orchestration:** Currently utilizing Docker Compose. Migration paths to Kubernetes are documented (`KUBERNETES_MIGRATION.md`), but native K8s manifests/Helm charts and HPA are not actively deployed or entirely shifted away from Docker Compose yet.
+- **Identity and Access Management (IAM):** Trust is successfully shifted to the Nginx gateway, which forwards `X-User-ID`. However, sessions still use stateful HTTP-only cookies backed by Redis, rather than the proposed stateless JWT/OAuth2 flows.
+
+### ❌ Remaining / Not Started
+- **Application-Level Defense (Security Headers):** The `helmet` middleware, which sets secure HTTP headers (e.g., CSP, HSTS, X-Frame-Options), is not yet installed or injected into the NestJS applications.
+- **Application-Level Rate Limiting:** While Nginx provides perimeter throttling, `@nestjs/throttler` is not yet configured for internal service-level rate limiting or complex bursting.
+- **Service-to-Service Security (mTLS):** Internal traffic between microservices is not cryptographically authenticated via a Service Mesh (e.g., Istio/Linkerd).
+- **Caching & Database Replicas:** Distributed in-memory caching (e.g., Redis for generic resolver outputs/REST payloads) and database read replicas with connection pooling (PgBouncer) remain theoretical.
+- **Advanced Observability Stack:** The underlying applications are instrumented to emit telemetry, but the self-hosted APM platforms (LGTM Stack) or SaaS targets are not actively receiving or visualizing the data in standard environment deployment.
+
 ---
 
 ## 1. Logging and Tracing
