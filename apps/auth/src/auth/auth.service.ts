@@ -1,17 +1,20 @@
 // apps/auth/src/auth.service.ts
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from '../dto/login.dto';
+import { ClientProxy } from '@nestjs/microservices';
+import { MESSAGE_PATTERNS, UserCreatedEvent } from 'shared-messaging';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-  ) {}
+    @Inject('RABBITMQ_SERVICE') private readonly client: ClientProxy,
+  ) { }
 
   async validateUser(email: string, pass: string): Promise<any> {
     // Find user and explicitly include the password for comparison
@@ -49,7 +52,24 @@ export class AuthService {
       role: role || 'customer',
     });
 
-    return await this.usersRepository.save(user);
+    const savedUser = await this.usersRepository.save(user);
+
+    // 4. Emit the UserCreatedEvent
+    const event: UserCreatedEvent = {
+      userId: savedUser.id,
+      email: savedUser.email,
+      name: savedUser.email.split('@')[0], // Mock name from email
+      timestamp: new Date().toISOString(),
+    };
+
+
+    console.log('Attempting to send message to RabbitMQ...', event);
+    this.client.emit(MESSAGE_PATTERNS.USER_CREATED, event).subscribe({
+      next: () => console.log('✅ Message successfully handed off to RabbitMQ!'),
+      error: (err) => console.error('❌ RabbitMQ Connection Error:', err),
+    });
+
+    return savedUser;
   }
 
   async forgotPassword(email: string): Promise<void> {

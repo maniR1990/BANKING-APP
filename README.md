@@ -58,86 +58,44 @@ $ pnpm run test:cov
 ```
 ## Microservices Architecture & Runbook
 
-This workspace contains three independent NestJS microservices managed inside an Nx monorepo. Each service lives under `apps/` and is responsible for a specific bounded context:
+This workspace contains three independent NestJS microservices managed inside an Nx monorepo.
 
-- **account** – handles account-related operations.
-- **auth** – authentication, user management, and health checks.
-- **customer** – GraphQL resolver for customer data.
+Detailed documentation is now consolidated in the [docs/](./docs/) folder:
+- **[Architecture & Design](./docs/ARCHITECTURE.md)**: High-level design, CI/CD diagrams, and service identification.
+- **[Kubernetes Commands](./docs/KUBERNETES_COMMANDS.md)**: Cheat sheet for building, deploying, and monitoring.
+- **[BFF Report](./docs/BFF_REPORT.md)**: Analysis of the Backend-for-Frontend pattern.
+- **[Cross-Cutting Concerns](./docs/CROSS_CUTTING_CONCERNS.md)**: Logging, tracing, and security strategy.
 
-### Technical Overview
+### Core Architecture Components
 
-1. **Monorepo & Nx**
-   - Projects configured via `project.json` files.
-   - Common build/test/lint commands executed with `pnpm nx <target> <project>`.
+1. **Monorepo & Nx**: Projects configured via `project.json`.
+2. **API Gateway**: Handled by **NGINX Ingress Controller** in Kubernetes.
+3. **Communication Patterns**:
+   - **Synchronous**: REST/GraphQL over HTTP.
+   - **Asynchronous**: Event-driven architecture using **RabbitMQ**.
+4. **Service Discovery**: Native **Kubernetes CoreDNS**.
+5. **Containerization**: production-ready **Dockerfiles** for all services.
 
-2. **Framework & Patterns**
-   - NestJS 11 with modules, controllers, services, and decorators.
-   - Transport: HTTP/Express for controllers; Redis used for microservice health pings.
-   - GraphQL in `customer` service using Apollo integration.
+### Quick Start (Kubernetes)
 
-3. **Data & Persistence**
-   - PostgreSQL accessed through TypeORM (`*.entity.ts` definitions).
-   - Each service may define its own entities.
-
-4. **Infrastructure**
-   - Dockerfiles in each app and a root `docker-compose.yml` orchestrating databases (Postgres, Redis) and services.
-   - Health checks using `@nestjs/terminus` (see `auth/src/health/health.controller.ts`).
-
-5. **Testing & Quality**
-   - Jest for unit/e2e; example e2e suite in `customer`.
-   - ESLint + Prettier config enforce style across workspace.
-
-6. **Build & Dev**
-   - Webpack configs for faster build iterations.
-   - `start:dev`, `start:prod` and Nx commands available via package scripts.
-
-### Dependencies
-
-Runtime dependencies are declared at the workspace root. Key packages include:
-
-- NestJS core modules: `@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express`, `@nestjs/microservices`, `@nestjs/terminus`, `@nestjs/graphql`, `@nestjs/typeorm`, etc.
-- Database: `typeorm`, `pg`.
-- Caching/Queue: `ioredis`.
-- Validation: `class-validator`, `class-transformer`.
-- Utilities: `axios`, `bcrypt`, `uuid`, `rxjs`, etc.
-
-Dev dependencies include Nx plugins, TypeScript tooling, Jest, ESLint, Prettier, and build helpers such as `ts-node`, `ts-jest` and `webpack-cli`.
-
-### Installation & Running
-
-1. **Install packages**:
+1. **Install packages**: `pnpm install`
+2. **Build & Deploy**:
    ```bash
-   pnpm install
+   # Build images
+   docker build -t banking-app-auth-service:latest -f apps/auth/Dockerfile .
+   docker build -t banking-app-account-service:latest -f apps/account/Dockerfile .
+   docker build -t banking-app-customer-service:latest -f apps/customer/Dockerfile .
+
+   # Apply manifests
+   kubectl apply -f k8s/
    ```
+3. **Port Forwarding**:
+   - Database: `kubectl port-forward svc/banking-postgres 5433:5432`
+   - RabbitMQ: `kubectl port-forward svc/rabbitmq-service 15672:15672`
 
-2. **Dockerized environment**:
-   ```bash
-   pnpm run docker:build   # build and start all containers
-   pnpm run docker:up      # start without rebuilding
-   pnpm run docker:down    # stop and remove volumes
-   ```
-   Services expose ports configured in `docker-compose.yml` (3000–3002).
-
-3. **Local development**:
-   ```bash
-   pnpm run start:dev      # run current service with file watch
-   pnpm nx serve account    # serve a specific project via Nx
-   ```
-
-4. **Testing**:
-   ```bash
-   pnpm nx test <project>
-   pnpm nx e2e customer
-   pnpm run test:cov
-   ```
-
-### Developer Notes
-
-- Use `pnpm nx generate` to scaffold new modules/services or libraries.
-- Shared logic should be extracted into `libs/` when duplication occurs.
-- Keep `package.json` versions aligned to avoid mismatches.
-- Extend health checks with additional indicators as the architecture grows.
-- Leverage Nx affected commands for efficient CI.
+### API Documentation & Testing
+- **Postman**: Import `Banking_App_API_Collection.postman_collection.json` from the root.
+- **Swagger**: Accessible at `http://localhost/public/<service>/api/docs` (e.g. `public/auth/api/docs`).
 
 ---
 

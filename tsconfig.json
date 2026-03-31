@@ -22,7 +22,8 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "common": ["libs/common/src/index.ts"]
+      "common": ["libs/common/src/index.ts"],
+      "shared-messaging": ["libs/shared-messaging/src/index.ts"]
     }
   }
 }

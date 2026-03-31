@@ -24,4 +24,4 @@ import { AppLoggerModule } from 'common';
     AuthModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }

@@ -15,7 +15,7 @@ This section tracks the progress of the cross-cutting concerns outlined in this 
 - **Basic Perimeter Defense:** Nginx API Gateway is set up with basic Rate Limiting (`limit_req_zone`) for authentication endpoints. Gateway validates sessions via the auth service before forwarding requests (`auth_request` pattern).
 
 ### 🚧 Partially Implemented / In Progress
-- **Scalability & Orchestration:** Currently utilizing Docker Compose. Migration paths to Kubernetes are documented (`KUBERNETES_MIGRATION.md`), but native K8s manifests/Helm charts and HPA are not actively deployed or entirely shifted away from Docker Compose yet.
+- **Scalability & Orchestration:** Successfully migrated to Kubernetes (Docker Desktop). Native K8s manifests for Deployments, Services, ConfigMaps, and Secrets are implemented and active.
 - **Identity and Access Management (IAM):** Trust is successfully shifted to the Nginx gateway, which forwards `X-User-ID`. However, sessions still use stateful HTTP-only cookies backed by Redis, rather than the proposed stateless JWT/OAuth2 flows.
 
 ### ❌ Remaining / Not Started
@@ -23,6 +23,7 @@ This section tracks the progress of the cross-cutting concerns outlined in this 
 - **Application-Level Rate Limiting:** While Nginx provides perimeter throttling, `@nestjs/throttler` is not yet configured for internal service-level rate limiting or complex bursting.
 - **Service-to-Service Security (mTLS):** Internal traffic between microservices is not cryptographically authenticated via a Service Mesh (e.g., Istio/Linkerd).
 - **Caching & Database Replicas:** Distributed in-memory caching (e.g., Redis for generic resolver outputs/REST payloads) and database read replicas with connection pooling (PgBouncer) remain theoretical.
+- **Asynchronous Messaging:** Implemented via RabbitMQ. Auth service publishes `UserCreatedEvent`, consumed by Account and Customer services for decoupled processing.
 - **Advanced Observability Stack:** The underlying applications are instrumented to emit telemetry, but the self-hosted APM platforms (LGTM Stack) or SaaS targets are not actively receiving or visualizing the data in standard environment deployment.
 
 ---

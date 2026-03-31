@@ -3,12 +3,23 @@ import { ApiTags, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger
 import { CustomerService } from './customer.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { Public, CurrentUser } from 'common';
+import { MESSAGE_PATTERNS, UserCreatedEvent } from 'shared-messaging';
+import { EventPattern, Payload } from '@nestjs/microservices';
 
 @ApiTags('Customer')
 @ApiSecurity('X-User-ID')
 @Controller()
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) { }
+
+  @EventPattern(MESSAGE_PATTERNS.USER_CREATED)
+  async handleUserCreated(@Payload() data: UserCreatedEvent) {
+    console.log('\n👤 === NEW EVENT RECEIVED IN CUSTOMER SERVICE ===');
+    console.log(`Building Customer KYC Profile for: ${data.email}`);
+    console.log(`Attached to Auth ID: ${data.userId}\n`);
+
+    // In real life: await this.customerService.createProfile(data);
+  }
 
   @Public()
   @Get('health')

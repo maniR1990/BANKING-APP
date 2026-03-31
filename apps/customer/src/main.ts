@@ -4,11 +4,36 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { GlobalExceptionFilter, AppLoggerModule } from 'common';
 import { Logger as PinoLogger } from 'nestjs-pino';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap'); // Principal Tip: Use Nest's Logger for startup
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   // 1. Determine the allowed origins based on the environment
+
+  // 1. CONNECT TO RABBITMQ (Same queue as Account service!)
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: [process.env.RABBITMQ_URL || 'amqp://guest:guest@rabbitmq-service:5672?heartbeat=30'],
+      queue: 'banking_events_queue',
+      prefetchCount: 1,
+      queueOptions: {
+        durable: true,
+        deadLetterExchange: 'banking_dlx',
+        deadLetterRoutingKey: 'failed_events',
+        messageTtl: 86400000,
+      },
+      socketOptions: {
+        clientProperties: {
+          connection_name: 'customer-service-consumer',
+        },
+      },
+    },
+  });
+
+  // 2. START LISTENERS
+  await app.startAllMicroservices();
   const allowedOrigins = process.env.NODE_ENV === 'production'
     ? [process.env.CORS_ORIGIN || 'https://your-production-domain.com']
     : ['http://localhost:8080', 'http://localhost']; // Allows local Swagger and local Frontend

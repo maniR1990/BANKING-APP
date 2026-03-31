@@ -2,12 +2,25 @@ import { Controller, Get, Post, Delete, Body, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { AccountService } from './account.service';
 import { Public, CurrentUser } from 'common';
+import { MESSAGE_PATTERNS, UserCreatedEvent } from 'shared-messaging';
+import { EventPattern, Payload } from '@nestjs/microservices';
 
 @ApiTags('Account')
 @ApiSecurity('X-User-ID')
 @Controller()
 export class AccountController {
   constructor(private readonly accountService: AccountService) { }
+
+  @EventPattern(MESSAGE_PATTERNS.USER_CREATED)
+  async handleUserCreated(@Payload() data: UserCreatedEvent) {
+    console.log('\n✅ === NEW EVENT RECEIVED IN ACCOUNT SERVICE ===');
+    console.log(`Provisioning default checking account for: ${data.name}`);
+    console.log(`User ID: ${data.userId}`);
+    console.log(`Timestamp: ${data.timestamp}\n`);
+
+    // In real life, you call your service here:
+    // await this.accountService.createCheckingAccount(data.userId);
+  }
 
   @Public()
   @Get()

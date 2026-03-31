@@ -131,15 +131,9 @@ The project leverages an Nx Monorepo structure containing all source code inside
   - **Present:** **Yes**.
   - **Details:** Achieved via HTTP REST. NGINX calls microservices synchronously. NGINX also synchronously calls the Auth service via `auth_request /internal-auth-validate` before allowing traffic to Account/Customer services.
 - **Asynchronous Communication:**
-  - **Present:** **No**.
-  - **Missing Explicitly:** There is no Message Broker or Event Bus implemented for fire-and-forget or pub/sub communication between the microservices.
-  - **Details:** If the Auth service wants to tell the Customer service a new user was created, it currently cannot do so without blocking the request.
-  - **How to implement:**
-    1. Add **RabbitMQ** or **Apache Kafka** to `docker-compose.yml`.
-    2. Import `@nestjs/microservices` into your applications.
-    3. Configure `ClientsModule.register()` in `app.module.ts` using the `Transport.RMQ` or `Transport.KAFKA` strategy.
-    4. Emit events like `this.client.emit('user_created', payload)`.
-    5. In the receiving service, use `@EventPattern('user_created')` to consume the message asynchronously.
+  - **Present:** **Yes**.
+  - **Details:** Implemented via **RabbitMQ** event bus using `@nestjs/microservices`.
+  - **Flow:** When a user is created in the `Auth` service, it publishes a `UserCreatedEvent` to the `banking_events_queue`. The `Account` and `Customer` services consume this event to automatically provision accounts and KYC profiles without blocking the main registration flow.
 
 ---
 
@@ -154,6 +148,6 @@ The project leverages an Nx Monorepo structure containing all source code inside
 | **Docker Containerisation** | ✅ Exists | No action required. Setup works well. |
 | **API Gateway** | ✅ Exists | Consider upgrading to Kong/Apisix if API management features (metrics, deep auth) are needed. |
 | **Service Discovery** | ❌ Missing | Implement Consul/Eureka or rely on Kubernetes if deploying to a cluster. Update NestJS startup scripts. |
-| **Asynchronous Comm.** | ❌ Missing | Add RabbitMQ/Kafka to docker-compose. Use `@nestjs/microservices` to emit and consume events. |
+| **Asynchronous Comm.** | ✅ Implemented | Using RabbitMQ for inter-service events. |
 
 By addressing the missing Service Discovery and Asynchronous Message Broker components, the system will fully meet robust enterprise microservice architecture standards.

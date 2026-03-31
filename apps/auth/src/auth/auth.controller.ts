@@ -63,6 +63,7 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'User created successfully.' })
   @ApiResponse({ status: 409, description: 'Email already registered.' })
   async register(@Body() registerDto: RegisterDto) {
+    console.log(`\n📝 [DEBUG] Registration request received for: ${registerDto.email}`);
     const user = await this.authService.register(registerDto);
 
     return {
