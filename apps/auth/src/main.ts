@@ -11,6 +11,7 @@ import { Logger as PinoLogger } from 'nestjs-pino';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
+  console.log('--- [VERIFICATION] RABBITMQ VERSION 2: FANOUT EXCHANGE ACTIVE ---');
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   // 1. Determine the allowed origins based on the environment
   const allowedOrigins = process.env.NODE_ENV === 'production'

@@ -6,4 +6,4 @@ data:
   DB_HOST: "banking-postgres"
   DB_PORT: "5432"
   DB_USERNAME: "postgres"
-  RABBITMQ_URL: "amqp://rabbitmq-service:5672"
+  RABBITMQ_URL: "amqp://guest:guest@rabbitmq-service:5672"

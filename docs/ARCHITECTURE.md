@@ -120,26 +120,10 @@ The project leverages an Nx Monorepo structure containing all source code inside
 - **Details:** Handled by a Kubernetes NGINX Ingress Controller. It manages rate-limiting, path-based routing (`/auth/`, `/customer/`, `/account/`), and **Internal Authentication Validation** via standard Ingress annotations (acting as an external auth guard).
 - **How to enhance:** While NGINX Ingress is a standard choice, for a robust enterprise solution you could upgrade to Kong Ingress or an API Gateway using Apisix for finer traffic control and observability plugins.
 
-### Communication Pattern: Synchronous vs Asynchronous
-- **Synchronous Communication:**
-  - **Present:** **Yes**.
-  - **Details:** Achieved via HTTP REST. The API Gateway routes to downstream microservices synchronously, acting as the primary medium of communication.
 - **Asynchronous Communication:**
-<<<<<<< HEAD:docs/ARCHITECTURE.md
   - **Present:** **Yes**.
   - **Details:** Implemented via **RabbitMQ** event bus using `@nestjs/microservices`.
   - **Flow:** When a user is created in the `Auth` service, it publishes a `UserCreatedEvent` to the `banking_events_queue`. The `Account` and `Customer` services consume this event to automatically provision accounts and KYC profiles without blocking the main registration flow.
-=======
-  - **Present:** **No**.
-  - **Missing Explicitly:** There is no Message Broker or Event Bus implemented for fire-and-forget or pub/sub communication between the microservices.
-  - **Details:** If the Auth service wants to tell the Customer service a new user was created, it currently cannot do so without blocking the request.
-  - **How to implement:**
-    1. Add **RabbitMQ** or **Apache Kafka** manifests into the `k8s/` directory.
-    2. Import `@nestjs/microservices` into your applications.
-    3. Configure `ClientsModule.register()` in `app.module.ts` using the `Transport.RMQ` or `Transport.KAFKA` strategy.
-    4. Emit events like `this.client.emit('user_created', payload)`.
-    5. In the receiving service, use `@EventPattern('user_created')` to consume the message asynchronously.
->>>>>>> d6eb1133dab18a778825fff39c48ebb295c382c9:ARCHITECTURE.md
 
 ---
 
@@ -151,16 +135,9 @@ The project leverages an Nx Monorepo structure containing all source code inside
 | **CI/CD Diagram** | ✅ Provided | Review diagrams in this file. Setup `.github/workflows`. |
 | **Postman Collection** | ✅ Provided | Import the generated JSON file into Postman. |
 | **Source Code structure** | ✅ Exists | Keep using Nx structure. |
-<<<<<<< HEAD:docs/ARCHITECTURE.md
-| **Docker Containerisation** | ✅ Exists | No action required. Setup works well. |
-| **API Gateway** | ✅ Exists | Consider upgrading to Kong/Apisix if API management features (metrics, deep auth) are needed. |
-| **Service Discovery** | ❌ Missing | Implement Consul/Eureka or rely on Kubernetes if deploying to a cluster. Update NestJS startup scripts. |
-| **Asynchronous Comm.** | ✅ Implemented | Using RabbitMQ for inter-service events. |
-=======
 | **Docker Containerisation** | ✅ Exists | Continue using Docker and K8s manifests in `k8s/`. |
 | **API Gateway** | ✅ Exists | Evaluate Kong or Apisix for extended functionalities beyond the Nginx Ingress. |
 | **Service Discovery** | ✅ Exists | Already functioning via Kubernetes Services. |
-| **Asynchronous Comm.** | ❌ Missing | Add RabbitMQ/Kafka manifests to `k8s/` and utilize `@nestjs/microservices` for inter-service events. |
->>>>>>> d6eb1133dab18a778825fff39c48ebb295c382c9:ARCHITECTURE.md
+| **Asynchronous Comm.** | ✅ Implemented | Using RabbitMQ for inter-service events. |
 
 By addressing the missing Service Discovery and Asynchronous Message Broker components, the system will fully meet robust enterprise microservice architecture standards.

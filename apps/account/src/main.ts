@@ -8,22 +8,26 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
+  logger.log('--- [VERIFICATION] RABBITMQ VERSION 2: FANOUT EXCHANGE ACTIVE ---');
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   // 1. TELL NESTJS TO CONNECT TO RABBITMQ
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
-      urls: [process.env.RABBITMQ_URL || 'amqp://localhost:5672'],
-      queue: 'banking_events_queue', // Must match the queue name exactly!
+      urls: [
+        (process.env.RABBITMQ_URL || 'amqp://guest:guest@rabbitmq-service:5672') +
+        '?heartbeat=60&connection_name=account-service-consumer'
+      ],
+      queue: 'account_queue',
+      exchange: 'banking_exchange',
+      exchangeType: 'fanout',
       queueOptions: {
         durable: true,
-        deadLetterExchange: 'banking_dlx',
-        deadLetterRoutingKey: 'failed_events',
-        messageTtl: 86400000,
       },
       prefetchCount: 1,
       socketOptions: {
+        heartbeatIntervalInSeconds: 60,
         clientProperties: {
           connection_name: 'account-service-consumer',
         },

@@ -8,15 +8,18 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         name: 'RABBITMQ_SERVICE',
         transport: Transport.RMQ,
         options: {
-          urls: [process.env['RABBITMQ_URL'] || 'amqp://guest:guest@rabbitmq-service:5672?heartbeat=30'],
-          queue: 'banking_events_queue',
+          urls: [
+            (process.env['RABBITMQ_URL'] || 'amqp://guest:guest@rabbitmq-service:5672') +
+            '?heartbeat=60&connection_name=banking-app-publisher'
+          ],
+          queue: 'account_queue', // Default queue for publisher (Nest needs one, but we use exchange)
+          exchange: 'banking_exchange',
+          exchangeType: 'fanout',
           queueOptions: {
             durable: true,
-            deadLetterExchange: 'banking_dlx',
-            deadLetterRoutingKey: 'failed_events',
-            messageTtl: 86400000,
           },
           socketOptions: {
+            heartbeatIntervalInSeconds: 60,
             clientProperties: {
               connection_name: 'banking-app-publisher',
             },

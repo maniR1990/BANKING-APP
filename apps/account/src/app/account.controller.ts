@@ -4,6 +4,7 @@ import { AccountService } from './account.service';
 import { Public, CurrentUser } from 'common';
 import { MESSAGE_PATTERNS, UserCreatedEvent } from 'shared-messaging';
 import { EventPattern, Payload } from '@nestjs/microservices';
+import { TransactionDto } from './dto/transaction.dto';
 
 @ApiTags('Account')
 @ApiSecurity('X-User-ID')
@@ -59,7 +60,7 @@ export class AccountController {
   @ApiResponse({ status: 201, description: 'Money added successfully' })
   addMoney(
     @Param('id') id: string,
-    @Body() body: { amount: number; customer: any },
+    @Body() body: TransactionDto,
     @CurrentUser() user: any,
   ) {
     // If you need to map body.customer to user.id, you can do it here.
@@ -72,7 +73,7 @@ export class AccountController {
   @ApiResponse({ status: 201, description: 'Money withdrawn successfully' })
   withdraw(
     @Param('id') id: string,
-    @Body() body: { amount: number; customer: any },
+    @Body() body: TransactionDto,
     @CurrentUser() user: any,
   ) {
     return this.accountService.withdrawMoney(id, body.amount, body.customer);

@@ -8,6 +8,7 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap'); // Principal Tip: Use Nest's Logger for startup
+  logger.log('--- [VERIFICATION] RABBITMQ VERSION 2: FANOUT EXCHANGE ACTIVE ---');
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   // 1. Determine the allowed origins based on the environment
 
@@ -15,16 +16,19 @@ async function bootstrap() {
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
-      urls: [process.env.RABBITMQ_URL || 'amqp://guest:guest@rabbitmq-service:5672?heartbeat=30'],
-      queue: 'banking_events_queue',
+      urls: [
+        (process.env.RABBITMQ_URL || 'amqp://guest:guest@rabbitmq-service:5672') +
+        '?heartbeat=60&connection_name=customer-service-consumer'
+      ],
+      queue: 'customer_queue',
+      exchange: 'banking_exchange',
+      exchangeType: 'fanout',
       prefetchCount: 1,
       queueOptions: {
         durable: true,
-        deadLetterExchange: 'banking_dlx',
-        deadLetterRoutingKey: 'failed_events',
-        messageTtl: 86400000,
       },
       socketOptions: {
+        heartbeatIntervalInSeconds: 60,
         clientProperties: {
           connection_name: 'customer-service-consumer',
         },

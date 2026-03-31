@@ -8,11 +8,18 @@ This document provides a comprehensive guide to the Swagger APIs for the Banking
 
 The microservices are deployed inside a Kubernetes cluster. To access the Swagger UI, use the following public URLs:
 
-| Service | Public Swagger URL |
-| :--- | :--- |
-| **Auth Service** | [http://localhost/public/auth/api/docs](http://localhost/public/auth/api/docs) |
-| **Account Service** | [http://localhost/public/account/api/docs](http://localhost/public/account/api/docs) |
-| **Customer Service** | [http://localhost/public/customer/api/docs](http://localhost/public/customer/api/docs) |
+| Service | Kubernetes Ingress (Port 80) | Local NodePort Access |
+| :--- | :--- | :--- |
+| **Auth Service** | [http://localhost/public/auth/api/docs](http://localhost/public/auth/api/docs) | [http://localhost:30000/public/auth/api/docs](http://localhost:30000/public/auth/api/docs) |
+| **Account Service** | [http://localhost/public/account/api/docs](http://localhost/public/account/api/docs) | [http://localhost:30001/public/account/api/docs](http://localhost:30001/public/account/api/docs) |
+| **Customer Service** | [http://localhost/public/customer/api/docs](http://localhost/public/customer/api/docs) | [http://localhost:30002/public/customer/api/docs](http://localhost:30002/public/customer/api/docs) |
+
+### 🛠️ Local Swagger UI (Standalone)
+If you have a standalone Swagger UI running on port `8080`, you can use these clickable links to load the API definitions directly:
+
+- **Auth API**: [http://localhost:8080/?url=http://localhost:30000/public/auth/api/docs-json](http://localhost:8080/?url=http://localhost:30000/public/auth/api/docs-json)
+- **Account API**: [http://localhost:8080/?url=http://localhost:30001/public/account/api/docs-json](http://localhost:8080/?url=http://localhost:30001/public/account/api/docs-json)
+- **Customer API**: [http://localhost:8080/?url=http://localhost:30002/public/customer/api/docs-json](http://localhost:8080/?url=http://localhost:30002/public/customer/api/docs-json)
 
 > [!NOTE]
 > These paths are "Public" and bypass the Authentication Guard so that you can view the documentation without logging in first.
