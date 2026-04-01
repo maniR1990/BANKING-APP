@@ -75,3 +75,4 @@ docker-compose.override.yml
 
 .nx/cache
 .nx/workspace-data
+.claude/settings.local.json
