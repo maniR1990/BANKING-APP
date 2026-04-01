@@ -18,7 +18,13 @@ export class CustomerController {
     console.log(`Building Customer KYC Profile for: ${data.email}`);
     console.log(`Attached to Auth ID: ${data.userId}\n`);
 
-    // In real life: await this.customerService.createProfile(data);
+    // Create customer profile in PostgreSQL DB
+    const customer = await this.customerService.create(
+      data.name,
+      data.email,
+      'Pending Address KYC'
+    );
+    console.log(`✅ Customer profile saved to Postgres DB with ID: ${customer.id}\n`);
   }
 
   @Public()

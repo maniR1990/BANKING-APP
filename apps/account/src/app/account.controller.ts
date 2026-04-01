@@ -19,8 +19,9 @@ export class AccountController {
     console.log(`User ID: ${data.userId}`);
     console.log(`Timestamp: ${data.timestamp}\n`);
 
-    // In real life, you call your service here:
-    // await this.accountService.createCheckingAccount(data.userId);
+    // Create account in our "in-memory" DB
+    const account = await this.accountService.createCheckingAccount(data.userId);
+    console.log(`✅ Default checking account [${account.id}] provisioned with $${account.balance} bonus!\n`);
   }
 
   @Public()

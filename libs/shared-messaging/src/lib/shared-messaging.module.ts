@@ -5,24 +5,34 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
   imports: [
     ClientsModule.register([
       {
-        name: 'RABBITMQ_SERVICE',
+        name: 'ACCOUNT_RMQ_SERVICE',
         transport: Transport.RMQ,
         options: {
           urls: [
             (process.env['RABBITMQ_URL'] || 'amqp://guest:guest@rabbitmq-service:5672') +
-            '?heartbeat=60&connection_name=banking-app-publisher'
+            '?heartbeat=60&connection_name=auth-to-account'
           ],
-          queue: 'account_queue', // Default queue for publisher (Nest needs one, but we use exchange)
-          exchange: 'banking_exchange',
-          exchangeType: 'fanout',
-          queueOptions: {
-            durable: true,
-          },
+          queue: 'account_queue',
+          queueOptions: { durable: true },
           socketOptions: {
             heartbeatIntervalInSeconds: 60,
-            clientProperties: {
-              connection_name: 'banking-app-publisher',
-            },
+            clientProperties: { connection_name: 'auth-to-account' },
+          },
+        },
+      },
+      {
+        name: 'CUSTOMER_RMQ_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [
+            (process.env['RABBITMQ_URL'] || 'amqp://guest:guest@rabbitmq-service:5672') +
+            '?heartbeat=60&connection_name=auth-to-customer'
+          ],
+          queue: 'customer_queue',
+          queueOptions: { durable: true },
+          socketOptions: {
+            heartbeatIntervalInSeconds: 60,
+            clientProperties: { connection_name: 'auth-to-customer' },
           },
         },
       },

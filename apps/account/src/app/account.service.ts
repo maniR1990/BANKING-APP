@@ -16,6 +16,19 @@ export class AccountService {
     return account;
   }
 
+  // Provision new checking account for user
+  createCheckingAccount(customerId: string): Account {
+    const newAccount: Account = {
+      id: `ACC-${Math.random().toString(36).substring(2, 8).toUpperCase()}`, // Simple ID
+      customerId,
+      balance: 100, // $100 Sign-up bonus for learning demo!
+      currency: 'USD',
+      status: 'ACTIVE',
+    };
+    this.accounts.push(newAccount);
+    return newAccount;
+  }
+
   // a. Add Money
   addMoney(id: string, amount: number, customerDetails: any) {
     this.validateCustomer(customerDetails);

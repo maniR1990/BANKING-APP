@@ -13,7 +13,8 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    @Inject('RABBITMQ_SERVICE') private readonly client: ClientProxy,
+    @Inject('ACCOUNT_RMQ_SERVICE') private readonly accountClient: ClientProxy,
+    @Inject('CUSTOMER_RMQ_SERVICE') private readonly customerClient: ClientProxy,
   ) { }
 
   async validateUser(email: string, pass: string): Promise<any> {
@@ -63,10 +64,16 @@ export class AuthService {
     };
 
 
-    console.log('Attempting to send message to RabbitMQ...', event);
-    this.client.emit(MESSAGE_PATTERNS.USER_CREATED, event).subscribe({
-      next: () => console.log('✅ Message successfully handed off to RabbitMQ!'),
-      error: (err) => console.error('❌ RabbitMQ Connection Error:', err),
+    console.log('Attempting to hand off messages to RabbitMQ...');
+
+    this.accountClient.emit(MESSAGE_PATTERNS.USER_CREATED, event).subscribe({
+      next: () => console.log('✅ Handed off to Account Service (account_queue)!'),
+      error: (err) => console.error('❌ RabbitMQ Account Connection Error:', err),
+    });
+
+    this.customerClient.emit(MESSAGE_PATTERNS.USER_CREATED, event).subscribe({
+      next: () => console.log('✅ Handed off to Customer Service (customer_queue)!'),
+      error: (err) => console.error('❌ RabbitMQ Customer Connection Error:', err),
     });
 
     return savedUser;

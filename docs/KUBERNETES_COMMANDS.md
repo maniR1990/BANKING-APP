@@ -107,6 +107,9 @@ kubectl logs -f deployment/banking-auth
 kubectl logs -f deployment/banking-account
 kubectl logs -f deployment/banking-customer
 
+kubectl logs deployment/banking-account | grep EVENT
+kubectl logs deployment/banking-customer | grep EVENT
+
 # View logs for a specific pod instance
 kubectl logs -f <pod-name>
 

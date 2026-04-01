@@ -10,9 +10,14 @@ import { IS_PUBLIC_KEY } from './public.decorator';
 
 @Injectable()
 export class GatewayAuthGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(private reflector: Reflector) { }
 
   canActivate(context: ExecutionContext): boolean {
+    // 0. Microservice Exception: Always allow internal RPC/Event traffic (RabbitMQ)
+    if (context.getType() === 'rpc') {
+      return true;
+    }
+
     // 1. Check for @Public() metadata
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
