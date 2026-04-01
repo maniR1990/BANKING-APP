@@ -24,7 +24,7 @@ export interface ProblemDetails {
 export class GlobalExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(GlobalExceptionFilter.name);
 
-  constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
+  constructor(private readonly httpAdapterHost: HttpAdapterHost) { }
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const { httpAdapter } = this.httpAdapterHost;
@@ -66,8 +66,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       detail =
         typeof exceptionResponse === 'object' && exceptionResponse !== null
           ? (exceptionResponse as any).message ||
-            JSON.stringify(exceptionResponse)
+          JSON.stringify(exceptionResponse)
           : exceptionResponse.toString();
+    } else if (
+      exception &&
+      typeof exception === 'object' &&
+      (exception as any).code === '23505'
+    ) {
+      // PostgreSQL Unique Constraint Violation
+      httpStatus = HttpStatus.CONFLICT;
+      title = 'Conflict';
+      detail = 'A resource with these unique details already exists.';
     } else {
       // 5xx errors: Mask internal details
       title = 'Internal Server Error';

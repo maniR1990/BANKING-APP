@@ -13,6 +13,10 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
   console.log('--- [VERIFICATION] RABBITMQ VERSION 2: FANOUT EXCHANGE ACTIVE ---');
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
+
+  // Set global prefix to match Nginx ingress /auth path
+  app.setGlobalPrefix('auth');
+
   // 1. Determine the allowed origins based on the environment
   const allowedOrigins = process.env.NODE_ENV === 'production'
     ? [process.env.CORS_ORIGIN || 'https://your-production-domain.com']

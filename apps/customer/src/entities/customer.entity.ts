@@ -21,4 +21,8 @@ export class Customer {
   @Field()
   @Column('text')
   address: string;
+
+  @Field()
+  @Column({ name: 'user_id', unique: true, nullable: true })
+  userId: string;
 }

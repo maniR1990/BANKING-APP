@@ -1,4 +1,4 @@
-import { IsNumber, IsNotEmpty, IsPositive, IsObject } from 'class-validator';
+import { IsNumber, IsNotEmpty, IsPositive, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class TransactionDto {
@@ -9,10 +9,10 @@ export class TransactionDto {
     amount: number;
 
     @ApiProperty({
-        example: { id: 'customer-123' },
-        description: 'Customer context object'
+        example: 'customer-uuid-123',
+        description: 'Customer UUID'
     })
-    @IsObject()
+    @IsString()
     @IsNotEmpty()
-    customer: any;
+    customerId: string;
 }

@@ -20,7 +20,7 @@ async function bootstrap() {
         (process.env.RABBITMQ_URL || 'amqp://guest:guest@rabbitmq-service:5672') +
         '?heartbeat=60&connection_name=customer-service-consumer'
       ],
-      queue: 'customer_queue',
+      queue: 'banking_queue',
       exchange: 'banking_exchange',
       exchangeType: 'fanout',
       prefetchCount: 1,
@@ -55,9 +55,8 @@ async function bootstrap() {
   const httpAdapter = app.get(HttpAdapterHost);
   app.useGlobalFilters(new GlobalExceptionFilter(httpAdapter));
 
-  // 1. Global Prefix for REST (if you still have controllers)
   app.setGlobalPrefix('api', {
-    exclude: ['graphql'], // Exclude GraphQL endpoint from the prefix
+    exclude: ['graphql'], // GraphQL remains at /graphql for internal ease
   });
 
   // 2. Enhanced Validation Pipe

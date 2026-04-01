@@ -18,7 +18,7 @@ import { RedisService } from './../redis/redis.service';
 import { LoginDto, RegisterDto, ForgotPasswordDto } from '../dto/login.dto';
 
 @ApiTags('Auth')
-@Controller('auth')
+@Controller()
 @UsePipes(new ValidationPipe({ whitelist: true })) // Security: Strips non-DTO properties
 export class AuthController {
   constructor(

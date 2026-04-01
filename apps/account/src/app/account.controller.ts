@@ -10,7 +10,9 @@ import { TransactionDto } from './dto/transaction.dto';
 @ApiSecurity('X-User-ID')
 @Controller()
 export class AccountController {
-  constructor(private readonly accountService: AccountService) { }
+  constructor(private readonly accountService: AccountService) {
+    console.log('\n⚡🚨 ACCOUNT CONTROLLER SUCCESSFULLY INSTANTIATED! 🚨⚡\n');
+  }
 
   @EventPattern(MESSAGE_PATTERNS.USER_CREATED)
   async handleUserCreated(@Payload() data: UserCreatedEvent) {
@@ -19,9 +21,16 @@ export class AccountController {
     console.log(`User ID: ${data.userId}`);
     console.log(`Timestamp: ${data.timestamp}\n`);
 
-    // Create account in our "in-memory" DB
+    // Create account in PostgreSQL DB
     const account = await this.accountService.createCheckingAccount(data.userId);
-    console.log(`✅ Default checking account [${account.id}] provisioned with $${account.balance} bonus!\n`);
+    console.log(`✅ Postgres checking account [${account.id}] provisioned with $${account.balance} bonus!\n`);
+  }
+
+  @EventPattern(MESSAGE_PATTERNS.CUSTOMER_DELETED)
+  async handleCustomerDeleted(@Payload() data: { customerId: string }) {
+    console.log('\n🗑️ === CUSTOMER DELETED EVENT RECEIVED ===');
+    console.log(`Cleaning up accounts for customer: ${data.customerId}\n`);
+    await this.accountService.deleteByCustomerId(data.customerId);
   }
 
   @Public()
@@ -56,6 +65,13 @@ export class AccountController {
     return this.accountService.getAccount(id);
   }
 
+  @Get('customer/:customerId')
+  @ApiOperation({ summary: 'Get Account by Customer ID' })
+  @ApiResponse({ status: 200, description: 'Returns account details' })
+  getAccountByCustomer(@Param('customerId') customerId: string) {
+    return this.accountService.getAccountByCustomerId(customerId);
+  }
+
   @Post(':id/add')
   @ApiOperation({ summary: 'Add money to an account' })
   @ApiResponse({ status: 201, description: 'Money added successfully' })
@@ -64,9 +80,7 @@ export class AccountController {
     @Body() body: TransactionDto,
     @CurrentUser() user: any,
   ) {
-    // If you need to map body.customer to user.id, you can do it here.
-    // Using user.id directly if applicable ensures security.
-    return this.accountService.addMoney(id, body.amount, body.customer);
+    return this.accountService.addMoney(id, body.amount, body.customerId);
   }
 
   @Post(':id/withdraw')
@@ -77,7 +91,7 @@ export class AccountController {
     @Body() body: TransactionDto,
     @CurrentUser() user: any,
   ) {
-    return this.accountService.withdrawMoney(id, body.amount, body.customer);
+    return this.accountService.withdrawMoney(id, body.amount, body.customerId);
   }
 
   @Delete(':id')

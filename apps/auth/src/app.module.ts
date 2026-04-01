@@ -1,27 +1,34 @@
-// apps/auth/src/app.module.ts
-import { Module } from '@nestjs/common';
+import { Controller, Get, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
 import { User } from './entities/user.entity';
 import { AppLoggerModule } from 'common';
 
+@Controller('health')
+export class HealthController {
+  @Get()
+  check() {
+    return { status: 'UP', service: 'auth-service' };
+  }
+}
+
 @Module({
   imports: [
     AppLoggerModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
-      // We use the env variable, but fall back to the docker service name
-      host: process.env.DB_HOST || 'banking_postgres',
-      port: parseInt(process.env.DB_PORT || '5432', 10),
+      host: process.env.DB_HOST || 'banking-postgres', // Use K8s service name
+      port: 5432,
       username: process.env.DB_USERNAME || 'postgres',
       password: process.env.DB_PASSWORD || 'admin',
-      database: process.env.DB_NAME || 'banking_auth', // Match your service
+      database: process.env.DB_NAME || 'banking_auth',
       entities: [User],
-      synchronize: true, // Auto-creates table 'users'
+      synchronize: true,
     }),
     RedisModule,
     AuthModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule { }

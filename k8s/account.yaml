@@ -112,7 +112,8 @@ kind: Ingress
 metadata:
   name: banking-account-ingress
   annotations:
-    nginx.ingress.kubernetes.io/auth-url: "http://banking-auth:3000/auth/validate?uri=$request_uri"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/auth-url: "http://banking-auth.default.svc.cluster.local:3000/auth/validate?uri=$request_uri"
     nginx.ingress.kubernetes.io/auth-response-headers: "X-User-ID"
     # Added CORS here too so your frontend can talk to it later
     nginx.ingress.kubernetes.io/enable-cors: "true"
@@ -125,7 +126,7 @@ spec:
     - http:
         paths:
           # Catches all other traffic to /account
-          - path: /account
+          - path: /account(/|$)(.*)
             pathType: Prefix
             backend:
               service:
@@ -157,3 +158,4 @@ spec:
                 name: banking-account
                 port:
                   number: 3001
+

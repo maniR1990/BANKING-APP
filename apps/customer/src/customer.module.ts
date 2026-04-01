@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLModule } from '@nestjs/graphql'; // 1. Add this
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'; // 2. Add this
 import { join } from 'path';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 import { CustomerController } from './customer.controller';
 import { CustomerService } from './customer.service';
@@ -46,8 +47,21 @@ import { AppLoggerModule } from 'common';
       }),
     }),
     TypeOrmModule.forFeature([Customer]),
+    ClientsModule.register([
+      {
+        name: 'RABBITMQ_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.RABBITMQ_URL || 'amqp://guest:guest@rabbitmq-service:5672'],
+          queue: 'banking_queue',
+          exchange: 'banking_exchange',
+          exchangeType: 'fanout',
+          queueOptions: { durable: true },
+        },
+      },
+    ]),
   ],
   controllers: [CustomerController],
   providers: [CustomerService, CustomerResolver],
 })
-export class CustomerModule {}
+export class CustomerModule { }

@@ -55,7 +55,7 @@ async function bootstrap() {
   const httpAdapter = app.get(HttpAdapterHost);
   app.useGlobalFilters(new GlobalExceptionFilter(httpAdapter));
 
-  app.setGlobalPrefix('api'); // Optional: Set a global prefix for REST endpoints
+  app.setGlobalPrefix('api'); // Standard API prefix
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

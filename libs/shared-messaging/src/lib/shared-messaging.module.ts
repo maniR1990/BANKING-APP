@@ -28,7 +28,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
             (process.env['RABBITMQ_URL'] || 'amqp://guest:guest@rabbitmq-service:5672') +
             '?heartbeat=60&connection_name=auth-to-customer'
           ],
-          queue: 'customer_queue',
+          queue: 'banking_queue',
           queueOptions: { durable: true },
           socketOptions: {
             heartbeatIntervalInSeconds: 60,

@@ -8,6 +8,23 @@
   "item": [
     {
       "name": "1. Gateway Health",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Gateway is up\", function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.status).to.equal('gateway-up');",
+              "});"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [],
@@ -16,7 +33,7 @@
           "host": ["{{base_url}}"],
           "path": ["health"]
         },
-        "description": "Check if the Nginx API Gateway is running."
+        "description": "Check if the Nginx API Gateway is running. Served by the global-health pod."
       },
       "response": []
     },
@@ -36,16 +53,28 @@
                   "pm.collectionVariables.set('dynamicPassword', 'Password123!');"
                 ]
               }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has userId\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.userId).to.be.a('string');",
+                  "    pm.collectionVariables.set('userId', jsonData.userId);",
+                  "});"
+                ]
+              }
             }
           ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -62,14 +91,32 @@
         },
         {
           "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 or 201\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "pm.test(\"Response has userId\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.userId).to.be.a('string');",
+                  "    pm.collectionVariables.set('userId', jsonData.userId);",
+                  "});",
+                  "pm.test(\"Login success message\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.equal('Login successful');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -86,14 +133,27 @@
         },
         {
           "name": "Forgot Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has reset message\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include('If an account');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -110,6 +170,23 @@
         },
         {
           "name": "Auth Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Service status is UP\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.equal('UP');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -129,6 +206,24 @@
       "item": [
         {
           "name": "Customer Service Health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Service status is ok\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.equal('ok');",
+                  "    pm.expect(jsonData.service).to.equal('customer-service');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -143,14 +238,28 @@
         },
         {
           "name": "Customer GraphQL Endpoint",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"GraphQL returns customers array\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('customers');",
+                  "    pm.expect(jsonData.data.customers).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
             ],
             "body": {
               "mode": "graphql",
@@ -164,20 +273,29 @@
               "host": ["{{base_url}}"],
               "path": ["customer", "graphql"]
             },
-            "description": "GraphQL endpoint for Customer service."
+            "description": "GraphQL endpoint for Customer service — fetch all customers."
           },
           "response": []
         },
         {
-          "name": "Create Customer (REST)",
+          "name": "Create Customer (REST) — Duplicate Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 409 (email already auto-provisioned)\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -188,20 +306,33 @@
               "host": ["{{base_url}}"],
               "path": ["customer", "api", ""]
             },
-            "description": "REST endpoint to create a customer using dynamic faker data."
+            "description": "Intentionally uses the same email as the registered user. The USER_CREATED event already auto-provisioned a customer with this email, so this returns 409 Conflict."
           },
           "response": []
         },
         {
-          "name": "Create Customer (GraphQL)",
+          "name": "Create Customer (GraphQL) — Duplicate Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 (GraphQL always returns 200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"GraphQL response contains errors for duplicate email\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.errors).to.be.an('array').with.lengthOf.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
             ],
             "body": {
               "mode": "graphql",
@@ -215,7 +346,140 @@
               "host": ["{{base_url}}"],
               "path": ["customer", "graphql"]
             },
-            "description": "GraphQL mutation to create a customer using dynamic faker data."
+            "description": "GraphQL mutation using the same (already taken) email. GraphQL returns HTTP 200 with an errors array."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Customers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response is an array\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "    pm.expect(jsonData.length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/customer/api/",
+              "host": ["{{base_url}}"],
+              "path": ["customer", "api", ""]
+            },
+            "description": "Get all customer profiles."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has customer fields\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.be.a('string');",
+                  "    pm.expect(jsonData.email).to.be.a('string');",
+                  "    pm.expect(jsonData.name).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/customer/api/{{userId}}",
+              "host": ["{{base_url}}"],
+              "path": ["customer", "api", "{{userId}}"]
+            },
+            "description": "Get a single customer profile by userId (falls back to userId lookup)."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Address was updated\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.address).to.equal('Updated Address 123');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address\": \"Updated Address 123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/customer/api/{{userId}}",
+              "host": ["{{base_url}}"],
+              "path": ["customer", "api", "{{userId}}"]
+            },
+            "description": "Update customer details."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Delete response has success flag\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.equal(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/customer/api/{{userId}}",
+              "host": ["{{base_url}}"],
+              "path": ["customer", "api", "{{userId}}"]
+            },
+            "description": "Delete a customer and trigger cascading account deletion."
           },
           "response": []
         }
@@ -226,6 +490,24 @@
       "item": [
         {
           "name": "Account Service Health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Service status is ok\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.equal('ok');",
+                  "    pm.expect(jsonData.service).to.equal('account-service');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -240,6 +522,23 @@
         },
         {
           "name": "Account API Root",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Root response is ok\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.equal('ok');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -253,38 +552,104 @@
           "response": []
         },
         {
-          "name": "Get Account",
+          "name": "Get Account by Customer ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has account fields\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.be.a('string');",
+                  "    pm.expect(jsonData.balance).to.exist;",
+                  "    pm.expect(jsonData.currency).to.equal('USD');",
+                  "    pm.collectionVariables.set('accountId', jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/account/api/1",
+              "raw": "{{base_url}}/account/api/customer/{{userId}}",
               "host": ["{{base_url}}"],
-              "path": ["account", "api", "1"]
+              "path": ["account", "api", "customer", "{{userId}}"]
             },
-            "description": "Get account details by ID."
+            "description": "Get account details by customer ID (userId from auth)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Account by Account ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has account and embedded customer\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.be.a('string');",
+                  "    pm.expect(jsonData.balance).to.exist;",
+                  "    pm.expect(jsonData.customer).to.be.an('object');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/account/api/{{accountId}}",
+              "host": ["{{base_url}}"],
+              "path": ["account", "api", "{{accountId}}"]
+            },
+            "description": "Get account by account UUID directly. Also fetches embedded customer details via RPC to Customer Service."
           },
           "response": []
         },
         {
           "name": "Add Money",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Balance increased\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(parseFloat(jsonData.balance)).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": 100,\n  \"customer\": { \"id\": \"1\" }\n}"
+              "raw": "{\n  \"amount\": 100,\n  \"customerId\": \"{{userId}}\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/account/api/1/add",
+              "raw": "{{base_url}}/account/api/{{accountId}}/add",
               "host": ["{{base_url}}"],
-              "path": ["account", "api", "1", "add"]
+              "path": ["account", "api", "{{accountId}}", "add"]
             },
             "description": "Add money to an account."
           },
@@ -292,23 +657,36 @@
         },
         {
           "name": "Withdraw Money",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Balance decreased\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(parseFloat(jsonData.balance)).to.be.at.least(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": 50,\n  \"customer\": { \"id\": \"1\" }\n}"
+              "raw": "{\n  \"amount\": 50,\n  \"customerId\": \"{{userId}}\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/account/api/1/withdraw",
+              "raw": "{{base_url}}/account/api/{{accountId}}/withdraw",
               "host": ["{{base_url}}"],
-              "path": ["account", "api", "1", "withdraw"]
+              "path": ["account", "api", "{{accountId}}", "withdraw"]
             },
             "description": "Withdraw money from an account."
           },
@@ -316,13 +694,30 @@
         },
         {
           "name": "Delete Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Delete response has success flag\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.equal(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/account/api/1",
+              "raw": "{{base_url}}/account/api/{{accountId}}",
               "host": ["{{base_url}}"],
-              "path": ["account", "api", "1"]
+              "path": ["account", "api", "{{accountId}}"]
             },
             "description": "Delete an account by ID."
           },
@@ -335,14 +730,27 @@
       "item": [
         {
           "name": "Change Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Sessions invalidated message\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include('invalidated');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -353,12 +761,29 @@
               "host": ["{{base_url}}"],
               "path": ["auth", "change-password"]
             },
-            "description": "Change password for the logged-in user and invalidate sessions."
+            "description": "Change password for the logged-in user and invalidate all sessions."
           },
           "response": []
         },
         {
           "name": "Logout User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 or 201\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "pm.test(\"Logout success message\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.equal('Logout successful');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [],
@@ -383,17 +808,6 @@
               "name": "Register User",
               "event": [
                 {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "pm.test(\"Status code is 201\", function () {",
-                      "    pm.response.to.have.status(201);",
-                      "});"
-                    ]
-                  }
-                },
-                {
                   "listen": "prerequest",
                   "script": {
                     "type": "text/javascript",
@@ -403,16 +817,23 @@
                       "pm.collectionVariables.set('dynamicPassword', 'Password123!');"
                     ]
                   }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 201\", function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});"
+                    ]
+                  }
                 }
               ],
               "request": {
                 "method": "POST",
                 "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
                 ],
                 "body": {
                   "mode": "raw",
@@ -422,8 +843,7 @@
                   "raw": "{{base_url}}/auth/register",
                   "host": ["{{base_url}}"],
                   "path": ["auth", "register"]
-                },
-                "description": "Register a new user in the Auth service."
+                }
               },
               "response": []
             },
@@ -435,12 +855,13 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test(\"Status code is 200 or 201\", function () {",
+                      "pm.test(\"Status code is 201\", function () {",
                       "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
                       "});",
-                      "pm.test(\"Cookie is set\", function () {",
-                      "    pm.expect(pm.cookies.has('connect.sid')).to.be.true;",
-                      "});"
+                      "const jsonData = pm.response.json();",
+                      "if (jsonData.userId) {",
+                      "    pm.collectionVariables.set('userId', jsonData.userId);",
+                      "}"
                     ]
                   }
                 }
@@ -448,11 +869,7 @@
               "request": {
                 "method": "POST",
                 "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
                 ],
                 "body": {
                   "mode": "raw",
@@ -462,13 +879,155 @@
                   "raw": "{{base_url}}/auth/login",
                   "host": ["{{base_url}}"],
                   "path": ["auth", "login"]
-                },
-                "description": "Login to receive an HTTP-Only session cookie."
+                }
               },
               "response": []
             },
             {
-              "name": "Account API Root",
+              "name": "Get Account (Capture accountId)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const jsonData = pm.response.json();",
+                      "if (jsonData.id) {",
+                      "    pm.collectionVariables.set('accountId', jsonData.id);",
+                      "    pm.collectionVariables.set('initialBalance', parseFloat(jsonData.balance));",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/account/api/customer/{{userId}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["account", "api", "customer", "{{userId}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Add Money (Real Data Flow)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 201\", function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "pm.test(\"Balance increased by 500\", function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    const initialBalance = parseFloat(pm.collectionVariables.get('initialBalance') || 0);",
+                      "    pm.expect(parseFloat(jsonData.balance)).to.equal(initialBalance + 500);",
+                      "    pm.collectionVariables.set('balanceAfterAdd', parseFloat(jsonData.balance));",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": 500,\n  \"customerId\": \"{{userId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/account/api/{{accountId}}/add",
+                  "host": ["{{base_url}}"],
+                  "path": ["account", "api", "{{accountId}}", "add"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Withdraw Insufficient Balance",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 400 for insufficient balance\", function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});",
+                      "pm.test(\"Error message mentions insufficient balance\", function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData.message).to.include('Insufficient balance');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": 999999,\n  \"customerId\": \"{{userId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/account/api/{{accountId}}/withdraw",
+                  "host": ["{{base_url}}"],
+                  "path": ["account", "api", "{{accountId}}", "withdraw"]
+                },
+                "description": "Intentionally withdraws more than the balance to assert 400 with 'Insufficient balance' error."
+              },
+              "response": []
+            },
+            {
+              "name": "Withdraw Money (Real Data Flow)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 201\", function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "pm.test(\"Balance decreased by 100\", function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    const balanceAfterAdd = parseFloat(pm.collectionVariables.get('balanceAfterAdd') || 0);",
+                      "    pm.expect(parseFloat(jsonData.balance)).to.equal(balanceAfterAdd - 100);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": 100,\n  \"customerId\": \"{{userId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/account/api/{{accountId}}/withdraw",
+                  "host": ["{{base_url}}"],
+                  "path": ["account", "api", "{{accountId}}", "withdraw"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Customer (Cascading)",
               "event": [
                 {
                   "listen": "test",
@@ -483,51 +1042,51 @@
                 }
               ],
               "request": {
-                "method": "GET",
+                "method": "DELETE",
                 "header": [],
                 "url": {
-                  "raw": "{{base_url}}/account/api/",
+                  "raw": "{{base_url}}/customer/api/{{userId}}",
                   "host": ["{{base_url}}"],
-                  "path": ["account", "api", ""]
-                },
-                "description": "Root endpoint for Account service API."
+                  "path": ["customer", "api", "{{userId}}"]
+                }
               },
               "response": []
             },
             {
-              "name": "Create Customer (REST)",
+              "name": "Verify Account Deleted (Cascade Check)",
               "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Allow time for the async CUSTOMER_DELETED event to be processed by account service",
+                      "const waitUntil = Date.now() + 1500;",
+                      "while (Date.now() < waitUntil) {}"
+                    ]
+                  }
+                },
                 {
                   "listen": "test",
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test(\"Status code is 201\", function () {",
-                      "    pm.response.to.have.status(201);",
+                      "pm.test(\"Status code is 404 — account was cascade-deleted\", function () {",
+                      "    pm.response.to.have.status(404);",
                       "});"
                     ]
                   }
                 }
               ],
               "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"{{$randomFullName}}\",\n  \"email\": \"{{dynamicEmail}}\",\n  \"address\": \"{{$randomStreetAddress}}\"\n}"
-                },
+                "method": "GET",
+                "header": [],
                 "url": {
-                  "raw": "{{base_url}}/customer/api/",
+                  "raw": "{{base_url}}/account/api/{{accountId}}",
                   "host": ["{{base_url}}"],
-                  "path": ["customer", "api", ""]
+                  "path": ["account", "api", "{{accountId}}"]
                 },
-                "description": "REST endpoint to create a customer."
+                "description": "After deleting the customer, the CUSTOMER_DELETED event triggers async account deletion. This verifies the cascade completed."
               },
               "response": []
             },
@@ -553,8 +1112,7 @@
                   "raw": "{{base_url}}/auth/logout",
                   "host": ["{{base_url}}"],
                   "path": ["auth", "logout"]
-                },
-                "description": "Logout and invalidate the session cookie."
+                }
               },
               "response": []
             }
@@ -586,7 +1144,7 @@
                   "host": ["{{base_url}}"],
                   "path": ["account", "api", ""]
                 },
-                "description": "Root endpoint for Account service API."
+                "description": "Protected route without session cookie — expects 401."
               },
               "response": []
             },
@@ -608,11 +1166,7 @@
               "request": {
                 "method": "POST",
                 "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
                 ],
                 "body": {
                   "mode": "raw",
@@ -623,7 +1177,7 @@
                   "host": ["{{base_url}}"],
                   "path": ["customer", "api", ""]
                 },
-                "description": "REST endpoint to create a customer."
+                "description": "Protected route without session cookie — expects 401."
               },
               "response": []
             },
@@ -649,11 +1203,7 @@
               "request": {
                 "method": "POST",
                 "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
                 ],
                 "body": {
                   "mode": "graphql",
@@ -667,7 +1217,215 @@
                   "host": ["{{base_url}}"],
                   "path": ["customer", "graphql"]
                 },
-                "description": "GraphQL endpoint for Customer service."
+                "description": "GraphQL endpoint without session cookie — expects 401."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Error Scenarios",
+          "item": [
+            {
+              "name": "Login with Wrong Password",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 401 for wrong password\", function () {",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "pm.test(\"Response has Unauthorized message\", function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData.message).to.include('Invalid credentials');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{dynamicEmail}}\",\n  \"password\": \"WrongPassword999!\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/auth/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["auth", "login"]
+                },
+                "description": "Attempt login with wrong password — expects 401 with 'Invalid credentials' message."
+              },
+              "response": []
+            },
+            {
+              "name": "Login (Setup for Error Tests)",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const uniqueId = Date.now();",
+                      "pm.collectionVariables.set('errorTestEmail', `erroruser_${uniqueId}@example.com`);",
+                      "pm.collectionVariables.set('errorTestPassword', 'Password123!');"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Setup register succeeded\", function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{errorTestEmail}}\",\n  \"password\": \"{{errorTestPassword}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/auth/register",
+                  "host": ["{{base_url}}"],
+                  "path": ["auth", "register"]
+                },
+                "description": "Registers a fresh user to obtain a valid session for subsequent error scenario tests."
+              },
+              "response": []
+            },
+            {
+              "name": "Login (Setup for Error Tests) — Authenticate",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Login succeeded for error test setup\", function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{errorTestEmail}}\",\n  \"password\": \"{{errorTestPassword}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/auth/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["auth", "login"]
+                },
+                "description": "Logs in the error-test user to set the session cookie for the 404 tests below."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Non-Existent Customer",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 404 for missing customer\", function () {",
+                      "    pm.response.to.have.status(404);",
+                      "});",
+                      "pm.test(\"Response has not found message\", function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData.message).to.include('not found');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/customer/api/00000000-0000-0000-0000-000000000000",
+                  "host": ["{{base_url}}"],
+                  "path": ["customer", "api", "00000000-0000-0000-0000-000000000000"]
+                },
+                "description": "GET a customer by a UUID that does not exist — expects 404."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Non-Existent Account",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 404 for missing account\", function () {",
+                      "    pm.response.to.have.status(404);",
+                      "});",
+                      "pm.test(\"Response has not found message\", function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData.message).to.include('not found');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/account/api/00000000-0000-0000-0000-000000000000",
+                  "host": ["{{base_url}}"],
+                  "path": ["account", "api", "00000000-0000-0000-0000-000000000000"]
+                },
+                "description": "GET an account by a UUID that does not exist — expects 404."
+              },
+              "response": []
+            },
+            {
+              "name": "Logout (Error Test Teardown)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Logout succeeded\", function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/auth/logout",
+                  "host": ["{{base_url}}"],
+                  "path": ["auth", "logout"]
+                },
+                "description": "Cleans up the session created for error scenario testing."
               },
               "response": []
             }
@@ -705,6 +1463,36 @@
     },
     {
       "key": "dynamicPassword",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "accountId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "initialBalance",
+      "value": "0",
+      "type": "string"
+    },
+    {
+      "key": "balanceAfterAdd",
+      "value": "0",
+      "type": "string"
+    },
+    {
+      "key": "errorTestEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "errorTestPassword",
       "value": "",
       "type": "string"
     }
